@@ -3,6 +3,7 @@
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
 google-services.json
+google-services.json.meta
 .utmp/
 /[Ll]ibrary/
 /[Tt]emp/
