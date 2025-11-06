@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
@@ -16,11 +17,21 @@ public class MultiImageSpawner : MonoBehaviour
         public Vector3 localScale;   // Opcional (1,1,1 si no tocas)
     }
 
+    [Header("Modo de Operación")]
+    [Tooltip("Usar Firebase para cargar datos dinámicos (requiere FirebaseManager en escena)")]
+    public bool useFirebase = true;
+    
+    [Tooltip("Prefab genérico que se instancia para todos los marcadores cuando Firebase está activo")]
+    public GameObject infoPanelPrefab;
+
+    [Header("Configuración Legacy (Sin Firebase)")]
+    [Tooltip("Mapeo manual de patrones a prefabs - Solo se usa si Firebase está desactivado")]
+    public List<Entry> mappings = new();
+    
     [Header("Configuración de Tracking")]
     [Tooltip("Si está activado, muestra objetos incluso con tracking limitado (útil para pantallas)")]
     public bool showWithLimitedTracking = true;
 
-    public List<Entry> mappings = new();
     Dictionary<string, Entry> byId;
     Dictionary<TrackableId, GameObject> spawned = new();
     ARTrackedImageManager mgr;
@@ -29,15 +40,35 @@ public class MultiImageSpawner : MonoBehaviour
     {
         mgr = GetComponent<ARTrackedImageManager>();
         byId = new Dictionary<string, Entry>();
-        foreach (var e in mappings)
+        
+        // Solo inicializar mapeo manual si no se usa Firebase
+        if (!useFirebase)
         {
-            if (!string.IsNullOrEmpty(e.id) && e.prefab)
+            foreach (var e in mappings)
             {
-                byId[e.id] = e;
-                Debug.Log($"[MultiImageSpawner] Mapeado: '{e.id}' -> Prefab: {e.prefab.name}");
+                if (!string.IsNullOrEmpty(e.id) && e.prefab)
+                {
+                    byId[e.id] = e;
+                    Debug.Log($"[MultiImageSpawner] Mapeado: '{e.id}' -> Prefab: {e.prefab.name}");
+                }
+            }
+            Debug.Log($"[MultiImageSpawner] Total de mapeos configurados: {byId.Count}");
+        }
+        else
+        {
+            Debug.Log("[MultiImageSpawner] ?? Modo Firebase ACTIVADO");
+            
+            if (infoPanelPrefab == null)
+            {
+                Debug.LogError("[MultiImageSpawner] ? infoPanelPrefab NO está asignado! Asigna el prefab en el Inspector");
+            }
+            
+            if (FirebaseManager.Instance == null)
+            {
+                Debug.LogWarning("[MultiImageSpawner] ?? FirebaseManager no encontrado en la escena");
             }
         }
-        Debug.Log($"[MultiImageSpawner] Total de mapeos configurados: {byId.Count}");
+        
         Debug.Log($"[MultiImageSpawner] Modo tracking limitado: {showWithLimitedTracking}");
     }
 
@@ -61,42 +92,81 @@ public class MultiImageSpawner : MonoBehaviour
         foreach (var img in e.removed) HandleRemoved(img);
     }
 
-    void HandleAdded(ARTrackedImage img)
+    async void HandleAdded(ARTrackedImage img)
     {
-        string id = img.referenceImage.name;
-        Debug.Log($"[MultiImageSpawner] Imagen DETECTADA: '{id}' | TrackingState: {img.trackingState}");
+        string documentId = img.referenceImage.name;
+        Debug.Log($"[MultiImageSpawner] ?? Imagen DETECTADA: '{documentId}' | TrackingState: {img.trackingState}");
         
-        if (!byId.TryGetValue(id, out var map))
+        GameObject spawnedObject = null;
+        
+        // MODO FIREBASE: Consultar datos y usar InfoPanel
+        if (useFirebase && infoPanelPrefab != null && FirebaseManager.Instance != null)
         {
-            Debug.LogWarning($"[MultiImageSpawner] ?? No hay prefab mapeado para '{id}'");
-            return;
+            Debug.Log($"[MultiImageSpawner] ?? Usando Firebase para '{documentId}'");
+            
+            // Instanciar prefab InfoPanel
+            spawnedObject = Instantiate(infoPanelPrefab, img.transform);
+            spawnedObject.transform.localPosition = Vector3.zero;
+            spawnedObject.transform.localRotation = Quaternion.identity;
+            spawnedObject.transform.localScale = Vector3.one;
+            
+            // Obtener controlador del panel
+            var controller = spawnedObject.GetComponent<InfoPanelController>();
+            
+            if (controller != null)
+            {
+                // Mostrar loading mientras consulta Firebase
+                controller.ShowLoading();
+                
+                // Consultar Firebase de forma asíncrona
+                Debug.Log($"[MultiImageSpawner] ? Consultando Firebase para '{documentId}'...");
+                BuildingData data = await FirebaseManager.Instance.GetBuildingDataAsync(documentId);
+                
+                // Actualizar panel con datos obtenidos
+                controller.SetData(data);
+                Debug.Log($"[MultiImageSpawner] ? Panel actualizado con datos de '{data.name}'");
+            }
+            else
+            {
+                Debug.LogError("[MultiImageSpawner] ? InfoPanelController no encontrado en el prefab!");
+            }
         }
-
-        Debug.Log($"[MultiImageSpawner] ? Spawneando prefab '{map.prefab.name}' para imagen '{id}'");
-        
-        var go = Instantiate(map.prefab, img.transform);
-        go.transform.localPosition = map.localOffset;
-        go.transform.localRotation = Quaternion.Euler(map.localEuler);
-        
-        // Corregir escala: si está en (0,0,0) usar (1,1,1) por defecto
-        if (map.localScale == Vector3.zero)
+        // MODO LEGACY: Usar mapeo manual
+        else if (!useFirebase && byId.TryGetValue(documentId, out var map))
         {
-            go.transform.localScale = Vector3.one;
-            Debug.Log($"[MultiImageSpawner] Escala por defecto aplicada (1,1,1)");
+            Debug.Log($"[MultiImageSpawner] ?? Usando mapeo manual para '{documentId}' -> Prefab: {map.prefab.name}");
+            
+            spawnedObject = Instantiate(map.prefab, img.transform);
+            spawnedObject.transform.localPosition = map.localOffset;
+            spawnedObject.transform.localRotation = Quaternion.Euler(map.localEuler);
+            
+            // Corregir escala: si está en (0,0,0) usar (1,1,1) por defecto
+            if (map.localScale == Vector3.zero)
+            {
+                spawnedObject.transform.localScale = Vector3.one;
+            }
+            else
+            {
+                spawnedObject.transform.localScale = map.localScale;
+            }
         }
         else
         {
-            go.transform.localScale = map.localScale;
-            Debug.Log($"[MultiImageSpawner] Escala personalizada aplicada: {map.localScale}");
+            Debug.LogWarning($"[MultiImageSpawner] ?? No hay prefab/configuración para '{documentId}'");
+            return;
         }
         
-        spawned[img.trackableId] = go;
-
-        // Decidir si mostrar el objeto basado en el tracking state
-        bool shouldShow = ShouldShowObject(img.trackingState);
-        go.SetActive(shouldShow);
-        
-        Debug.Log($"[MultiImageSpawner] Objeto '{go.name}' spawneado | Activo: {shouldShow} | Posición: {go.transform.position} | TrackingState: {img.trackingState}");
+        // Guardar referencia del objeto spawneado
+        if (spawnedObject != null)
+        {
+            spawned[img.trackableId] = spawnedObject;
+            
+            // Decidir si mostrar el objeto basado en el tracking state
+            bool shouldShow = ShouldShowObject(img.trackingState);
+            spawnedObject.SetActive(shouldShow);
+            
+            Debug.Log($"[MultiImageSpawner] ? Objeto spawneado | Activo: {shouldShow} | Posición: {spawnedObject.transform.position}");
+        }
     }
 
     void HandleUpdated(ARTrackedImage img)

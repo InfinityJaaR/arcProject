@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "415950258145",
-    "project_id": "studio-735151139-d4e2a",
-    "storage_bucket": "studio-735151139-d4e2a.firebasestorage.app"
+    "project_number": "545691768361",
+    "project_id": "studio-8639786516-73347",
+    "storage_bucket": "studio-8639786516-73347.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:415950258145:android:b4c31191877ab8c9fcdca0",
+        "mobilesdk_app_id": "1:545691768361:android:f65f5ae1fa2c3eae74ee38",
         "android_client_info": {
           "package_name": "com.UES.ArcProject"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCjY2a_IveZBWFqxUI_Gx3UC9qvq3Vdruw"
+          "current_key": "AIzaSyDALMh8rKW96BrB18H2Eb2Y1jIFZjBYx7E"
         }
       ],
       "services": {

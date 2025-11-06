@@ -182,6 +182,53 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &126553771
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 126553773}
+  - component: {fileID: 126553772}
+  m_Layer: 0
+  m_Name: FirebaseManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &126553772
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 126553771}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 012ed7fd9d7cc2247881837ddd92be6d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  collectionName: buildingLocations
+  enableCache: 1
+  simulateDataInEditor: 1
+--- !u!4 &126553773
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 126553771}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 136.30956, y: 65.51412, z: -340.33566}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &223974226
 GameObject:
   m_ObjectHideFlags: 0
@@ -387,17 +434,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccfe2410a2e46834495be1c1a9eebc55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mappings:
-  - id: biblioteca
-    prefab: {fileID: 6280424879290088643, guid: 930bed87a20e4824f8d522ef6ae9f82e, type: 3}
-    localOffset: {x: 0, y: 0, z: 0}
-    localEuler: {x: 0, y: 0, z: 0}
-    localScale: {x: 0, y: 0, z: 0}
-  - id: cafeteria
-    prefab: {fileID: 2116523900667090375, guid: eec859220abff394e9fa27024466c540, type: 3}
-    localOffset: {x: 0, y: 0, z: 0}
-    localEuler: {x: 0, y: 0, z: 0}
-    localScale: {x: 0, y: 0, z: 0}
+  useFirebase: 1
+  infoPanelPrefab: {fileID: 3825279609516042856, guid: df3f3c4b097084f4d88162f4f4b1e381, type: 3}
+  mappings: []
+  showWithLimitedTracking: 0
 --- !u!1 &1828601335
 GameObject:
   m_ObjectHideFlags: 0
@@ -633,3 +673,4 @@ SceneRoots:
   - {fileID: 705507995}
   - {fileID: 40919617}
   - {fileID: 782628378}
+  - {fileID: 126553773}
