@@ -207,4 +207,23 @@ public class MultiImageSpawner : MonoBehaviour
             return state == TrackingState.Tracking;
         }
     }
+    
+    /// <summary>
+    /// Activa o desactiva el sistema de tracking de imágenes
+    /// Usado cuando se cambia entre modo MARKER_TRACKING y modo NAVIGATION
+    /// </summary>
+    /// <param name="enabled">True para activar, False para desactivar</param>
+    public void SetTrackingEnabled(bool enabled)
+    {
+        Debug.Log($"[MultiImageSpawner] {(enabled ? "? Activando" : "?? Desactivando")} tracking de marcadores");
+        
+        // Mostrar u ocultar todos los objetos spawneados
+        foreach (var kvp in spawned)
+        {
+            if (kvp.Value != null)
+            {
+                kvp.Value.SetActive(enabled);
+            }
+        }
+    }
 }

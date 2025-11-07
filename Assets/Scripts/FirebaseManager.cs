@@ -233,4 +233,120 @@ public class FirebaseManager : MonoBehaviour
     {
         return cache.Count;
     }
+    
+    /// <summary>
+    /// Obtiene todos los edificios/lugares disponibles en la colección de Firestore
+    /// Útil para mostrar una lista de destinos en la UI de navegación
+    /// </summary>
+    /// <returns>Lista de BuildingData con todos los lugares disponibles</returns>
+    public async Task<List<BuildingData>> GetAllBuildingsAsync()
+    {
+        Debug.Log("[FirebaseManager] ?? Obteniendo lista de todos los edificios...");
+        
+        #if UNITY_EDITOR
+        if (simulateDataInEditor)
+        {
+            Debug.Log("[FirebaseManager] ?? Modo simulación - Retornando datos de prueba");
+            await Task.Delay(300);
+            return GetSimulatedBuildings();
+        }
+        #endif
+        
+        if (!isInitialized)
+        {
+            Debug.LogWarning("[FirebaseManager] ?? Firebase no está inicializado");
+            await Task.Delay(1000);
+            
+            if (!isInitialized)
+            {
+                Debug.LogError("[FirebaseManager] ? No se pudo inicializar Firebase");
+                return new List<BuildingData>();
+            }
+        }
+        
+        try
+        {
+            Debug.Log($"[FirebaseManager] ?? Consultando toda la colección '{collectionName}'...");
+            
+            CollectionReference collectionRef = db.Collection(collectionName);
+            QuerySnapshot snapshot = await collectionRef.GetSnapshotAsync();
+            
+            List<BuildingData> buildings = new List<BuildingData>();
+            
+            foreach (DocumentSnapshot document in snapshot.Documents)
+            {
+                if (document.Exists)
+                {
+                    BuildingData building = ParseDocument(document);
+                    buildings.Add(building);
+                    
+                    // Guardar en caché
+                    if (enableCache)
+                    {
+                        cache[document.Id] = building;
+                    }
+                }
+            }
+            
+            Debug.Log($"[FirebaseManager] ? Se obtuvieron {buildings.Count} edificios");
+            return buildings;
+        }
+        catch (FirebaseException ex)
+        {
+            Debug.LogError($"[FirebaseManager] ? Error Firebase: {ex.ErrorCode}");
+            Debug.LogError($"[FirebaseManager] Mensaje: {ex.Message}");
+            
+            if (ex.ErrorCode == 7) // PERMISSION_DENIED
+            {
+                Debug.LogError("[FirebaseManager] ?? PERMISSION_DENIED - Verifica las reglas de Firestore");
+            }
+            
+            return new List<BuildingData>();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[FirebaseManager] ? Error al obtener edificios: {ex.Message}");
+            return new List<BuildingData>();
+        }
+    }
+    
+    /// <summary>
+    /// Retorna una lista de edificios simulados para testing en Unity Editor
+    /// </summary>
+    private List<BuildingData> GetSimulatedBuildings()
+    {
+        return new List<BuildingData>
+        {
+            new BuildingData(
+                "Biblioteca Central",
+                "Sistema bibliotecario moderno con recursos digitales e impresos",
+                13.7181033,
+                -89.2040915
+            ),
+            new BuildingData(
+                "Facultad de Ingeniería",
+                "Edificio principal de la Facultad de Ingeniería y Arquitectura",
+                13.7185000,
+                -89.2045000
+            ),
+            new BuildingData(
+                "Rectoría",
+                "Edificio administrativo central de la universidad",
+                13.7178000,
+                -89.2038000
+            ),
+            new BuildingData(
+                "Cafetería Central",
+                "Principal área de comidas de la universidad",
+                13.7183000,
+                -89.2042000
+            ),
+            new BuildingData(
+                "Auditorio Principal",
+                "Espacio para eventos y conferencias universitarias",
+                13.7180000,
+                -89.2040000
+            )
+        };
+    }
 }
