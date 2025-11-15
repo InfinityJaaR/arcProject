@@ -2198,6 +2198,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 861051066}
   m_CullTransparentMesh: 1
+--- !u!1 &875618338
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 875618340}
+  - component: {fileID: 875618339}
+  m_Layer: 0
+  m_Name: PermissionsManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &875618339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 875618338}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a9fb99251327c442a61c28e295e8f9e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  requestOnStart: 1
+  showRationale: 0
+--- !u!4 &875618340
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 875618338}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &887583933
 GameObject:
   m_ObjectHideFlags: 0
@@ -2866,6 +2912,7 @@ MonoBehaviour:
   arrowScale: 0.05
   smoothPositionMovement: 1
   positionSmoothSpeed: 10
+  invertArrowModel: 1
   rotationSmoothSpeed: 8
   enableVerticalTilt: 1
   enableDistanceColorFeedback: 1
@@ -3286,12 +3333,16 @@ MonoBehaviour:
   desiredAccuracyInMeters: 10
   updateDistanceInMeters: 5
   maxWaitTime: 20
-  simulateInEditor: 1
+  compassInitTimeout: 10
+  useGPSBearingFallback: 1
+  minSpeedForGPSBearing: 0.5
+  simulateInEditor: 0
   simulatedLatitude: 13.7181033
   simulatedLongitude: -89.2040915
   simulatedBearing: 0
   isGPSEnabled: 0
   isCompassEnabled: 0
+  compassHasValidData: 0
   locationStatus: 0
 --- !u!4 &1830226562
 Transform:
@@ -4042,3 +4093,4 @@ SceneRoots:
   - {fileID: 2052299411}
   - {fileID: 2128218250}
   - {fileID: 830108437}
+  - {fileID: 875618340}

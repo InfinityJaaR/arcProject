@@ -1,0 +1,341 @@
+# ?? EXPLICACIÓN: Cómo Unity Detecta el Norte Real
+
+## ?? Sensores Involucrados
+
+Unity usa **3 sensores** para determinar la orientación:
+
+```
+???????????????????????????????????????????????????
+?                                                 ?
+?  1??  MAGNETÓMETRO (Brújula)                     ?
+?      - Detecta campo magnético de la Tierra    ?
+?      - Proporciona Norte MAGNÉTICO              ?
+?      - Input.compass.magneticHeading            ?
+?                                                 ?
+?  2??  GPS                                         ?
+?      - Proporciona ubicación lat/lon           ?
+?      - Conoce la declinación magnética local   ?
+?      - Input.location.lastData                  ?
+?                                                 ?
+?  3??  ACELERÓMETRO + GIROSCOPIO                  ?
+?      - Detectan inclinación del dispositivo    ?
+?      - Compensan la orientación 3D              ?
+?      - Input.gyro / Input.acceleration          ?
+?                                                 ?
+???????????????????????????????????????????????????
+```
+
+---
+
+## ?? Norte Magnético vs Norte Verdadero
+
+### **Norte Magnético**
+```
+       ? Polo Magnético
+      ?
+     ?   ~11° diferencia
+    ?    (varía según ubicación)
+   ?
+  ?? Magnetómetro
+```
+- Apunta a los **polos magnéticos** de la Tierra
+- Los polos magnéticos **se mueven** constantemente
+- Está aproximadamente en Canadá (polo norte) y Antártida (polo sur)
+
+### **Norte Verdadero (Geográfico)**
+```
+   ?? Polo Norte Geográfico
+   ?
+   ?
+   ? Eje de rotación de la Tierra
+   ?
+  ?? Tu ubicación
+```
+- Apunta al **eje de rotación** de la Tierra
+- **Fijo** y constante
+- Usado en mapas y navegación GPS
+
+### **Declinación Magnética**
+La diferencia angular entre ambos nortes:
+
+```
+         Norte Verdadero
+              ?
+              ?
+         ???????????
+         ?    ?    ?
+         ?    ?    ?  ? Ángulo de declinación
+         ?    ?    ?     (varía según ubicación)
+         ?  ?      ?
+         ??        ?
+         ???????????
+      Norte Magnético
+```
+
+**Ejemplos por ubicación:**
+- **El Salvador**: -2° a -4° (el Norte Magnético está al OESTE del Verdadero)
+- **Londres**: ~0° (casi sin diferencia)
+- **Nueva York**: -13° (gran diferencia)
+- **Tokio**: +7° (el Norte Magnético está al ESTE del Verdadero)
+
+---
+
+## ?? Cómo Unity Calcula `trueHeading`
+
+Unity hace este cálculo interno:
+
+```csharp
+// PSEUDO-CÓDIGO (Unity lo hace automáticamente)
+
+float magneticHeading = magnetometer.GetHeading(); // Del sensor
+double latitude = GPS.GetLatitude();
+double longitude = GPS.GetLongitude();
+
+// Obtener declinación magnética de base de datos interna
+float declination = GetMagneticDeclination(latitude, longitude);
+
+// Calcular Norte Verdadero
+float trueHeading = magneticHeading + declination;
+
+// Normalizar a rango [0, 360)
+if (trueHeading < 0) trueHeading += 360f;
+if (trueHeading >= 360f) trueHeading -= 360f;
+```
+
+### **En El Salvador (ejemplo):**
+
+```
+Ubicación GPS: 13.7181° N, -89.2041° W
+Declinación magnética: -3.5° (aproximado)
+
+Si el magnetómetro lee: 45° (Noreste magnético)
+Entonces:
+  trueHeading = 45° + (-3.5°) = 41.5° (Noreste verdadero)
+```
+
+---
+
+## ?? API de Unity
+
+### **Input.compass**
+
+```csharp
+// Habilitar brújula
+Input.compass.enabled = true;
+
+// Norte MAGNÉTICO (del magnetómetro puro)
+float magneticNorth = Input.compass.magneticHeading;
+// Rango: [0, 360) donde 0° = Norte Magnético
+
+// Norte VERDADERO/GEOGRÁFICO (corregido con GPS)
+float trueNorth = Input.compass.trueHeading;
+// Rango: [0, 360) donde 0° = Norte Geográfico Real
+
+// Precisión de la medición
+float accuracy = Input.compass.headingAccuracy;
+// En grados. Valores bajos = mejor
+
+// Timestamp del último dato
+double timestamp = Input.compass.timestamp;
+// -1 = sin datos
+// > 0 = tiempo desde que se obtuvo la lectura
+
+// Vector magnético crudo (3D)
+Vector3 rawMagneticField = Input.compass.rawVector;
+// Magnitudes del campo magnético en X, Y, Z
+```
+
+---
+
+## ?? Qué Usar en Navegación AR
+
+### **Para Navegación Absoluta (Mundo Real):**
+
+```csharp
+// USAR trueHeading - representa el Norte geográfico real
+float deviceOrientation = Input.compass.trueHeading;
+
+// Calcular hacia dónde apunta el destino
+float bearingToDestination = CalculateBearing(
+    currentLat, currentLon,
+    destinationLat, destinationLon
+);
+
+// Ángulo relativo (cuánto girar la flecha)
+float relativeAngle = bearingToDestination - deviceOrientation;
+```
+
+### **Ventajas de `trueHeading`:**
+? Coincide con mapas GPS (Google Maps, etc.)  
+? Consistente globalmente  
+? Más preciso para navegación de largo alcance  
+
+### **Cuándo usar `magneticHeading`:**
+- Cuando el GPS no está disponible
+- Navegación relativa (sin coordenadas GPS)
+- Juegos que solo necesitan orientación local
+
+---
+
+## ?? Problemas Comunes
+
+### **1. `trueHeading` devuelve NaN o valores negativos**
+
+**Causa:** GPS no está activo o no tiene fix.
+
+**Solución:**
+```csharp
+if (float.IsNaN(Input.compass.trueHeading) || Input.compass.trueHeading < 0)
+{
+    // Fallback a magneticHeading
+    heading = Input.compass.magneticHeading;
+}
+```
+
+### **2. `timestamp == -1`**
+
+**Causa:** El magnetómetro no está proporcionando datos.
+
+**Soluciones:**
+- Calibrar la brújula (mover en figura de 8)
+- Alejarse de interferencias magnéticas
+- Reiniciar el sensor
+
+```csharp
+if (Input.compass.timestamp < 0)
+{
+    Debug.LogWarning("Magnetómetro no inicializado");
+    // Mostrar UI de calibración
+}
+```
+
+### **3. Valores saltan erráticamente**
+
+**Causa:** Interferencia magnética o sensor sin calibrar.
+
+**Solución:**
+```csharp
+// Suavizar valores con Lerp
+float smoothedHeading = Mathf.LerpAngle(
+    lastHeading,
+    Input.compass.trueHeading,
+    Time.deltaTime * smoothSpeed
+);
+```
+
+---
+
+## ?? Debugging Avanzado
+
+### **Verificar Vector Magnético Crudo:**
+
+```csharp
+Vector3 raw = Input.compass.rawVector;
+
+// Magnitud del campo magnético
+float magnitude = raw.magnitude;
+
+// Valores típicos en la superficie terrestre: 25-65 µT
+// Unity devuelve en unidades arbitrarias, pero la magnitud relativa es útil
+
+if (magnitude < 10f)
+{
+    Debug.LogWarning("Campo magnético muy débil - posible interferencia");
+}
+```
+
+### **Comparar con Datos de Referencia:**
+
+Puedes validar contra la declinación magnética real:
+- [NOAA Magnetic Declination Calculator](https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml)
+
+```
+Para El Salvador (San Salvador):
+  Lat: 13.7° N
+  Lon: -89.2° W
+  Declinación: -3.5° W (hacia el oeste)
+  
+Verificar:
+  trueHeading ? magneticHeading - 3.5°
+```
+
+---
+
+## ?? Diagrama de Flujo Completo
+
+```
+???????????????????
+?  Unity Startup  ?
+???????????????????
+         ?
+         ?
+???????????????????????????
+? Input.compass.enabled   ?
+?      = true             ?
+???????????????????????????
+         ?
+         ?
+???????????????????????????????????
+?  Android inicia magnetómetro    ?
+?  (hardware sensor)              ?
+???????????????????????????????????
+         ?
+         ?
+    ??????????????????
+    ?  timestamp > 0 ?   NO ? Esperar/Calibrar
+    ??????????????????
+             ? SÍ
+             ?
+??????????????????????????????????
+?  Lee campo magnético 3D        ?
+?  (Vector3 rawVector)           ?
+??????????????????????????????????
+         ?
+         ?
+??????????????????????????????????
+?  Calcula magneticHeading       ?
+?  (ángulo en plano horizontal)  ?
+??????????????????????????????????
+         ?
+         ?
+    ??????????????
+    ?  GPS ready ?   NO ? trueHeading = NaN
+    ??????????????
+         ? SÍ
+         ?
+????????????????????????????????????
+?  Obtiene declinación magnética   ?
+?  según ubicación GPS             ?
+????????????????????????????????????
+         ?
+         ?
+????????????????????????????????????
+?  trueHeading =                   ?
+?    magneticHeading + declination ?
+????????????????????????????????????
+         ?
+         ?
+????????????????????????????????????
+?  Tu script lee:                  ?
+?  Input.compass.trueHeading       ?
+????????????????????????????????????
+```
+
+---
+
+## ?? Conclusión
+
+**Unity NO tiene una "base de datos interna" del norte.**  
+Usa el **magnetómetro del dispositivo** (sensor físico) y lo corrige con **GPS**.
+
+**Requisitos para que funcione:**
+1. ? Magnetómetro funcional (hardware)
+2. ? GPS activo con fix (para trueHeading)
+3. ? Sensor calibrado (sin interferencias)
+4. ? Permisos de Android correctos
+
+**Si falla:**
+- Calibrar físicamente (figura de 8)
+- Alejarse de metal/electrónica
+- Usar `magneticHeading` como fallback
+- Usar GPS bearing si el usuario se mueve

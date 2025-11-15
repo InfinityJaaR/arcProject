@@ -12,19 +12,27 @@ public class BuildingData
     public string description;     // Descripción detallada del lugar
     public double latitude;        // Coordenada de latitud
     public double longitude;       // Coordenada de longitud
+    public string nearby_places;   // Lugares cercanos (texto simple)
+    public string type;            // Tipo de lugar (ej: "edificio", "monumento", etc.)
     
     // Constructor vacío para deserialización de Firebase
-    public BuildingData() { }
+    public BuildingData() 
+    {
+        nearby_places = "";
+        type = "";
+    }
     
     /// <summary>
     /// Constructor para crear datos de prueba o fallback
     /// </summary>
-    public BuildingData(string name, string description, double latitude = 0, double longitude = 0)
+    public BuildingData(string name, string description, double latitude = 0, double longitude = 0, string nearbyPlaces = "", string type = "")
     {
         this.name = name;
         this.description = description;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.nearby_places = nearbyPlaces;
+        this.type = type;
     }
     
     /// <summary>
@@ -109,5 +117,21 @@ public class BuildingData
             return "Coordenadas no disponibles";
         
         return $"?? Lat: {latitude:F6}, Lon: {longitude:F6}";
+    }
+    
+    /// <summary>
+    /// Verifica si tiene lugares cercanos
+    /// </summary>
+    public bool HasNearbyPlaces()
+    {
+        return !string.IsNullOrEmpty(nearby_places);
+    }
+    
+    /// <summary>
+    /// Verifica si es un edificio (navegable)
+    /// </summary>
+    public bool IsEdificio()
+    {
+        return !string.IsNullOrEmpty(type) && type.ToLower() == "edificio";
     }
 }

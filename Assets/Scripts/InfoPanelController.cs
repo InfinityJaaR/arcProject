@@ -19,6 +19,12 @@ public class InfoPanelController : MonoBehaviour
     [Tooltip("TextMeshPro que muestra las coordenadas")]
     public TextMeshProUGUI coordinatesText;
     
+    [Tooltip("TextMeshPro que muestra los lugares cercanos")]
+    public TextMeshProUGUI nearbyPlacesText;
+    
+    [Tooltip("GameObject contenedor de la sección de lugares cercanos (para ocultar si no hay datos)")]
+    public GameObject nearbyPlacesContainer;
+    
     [Header("Loading")]
     [Tooltip("GameObject que contiene el indicador de carga")]
     public GameObject loadingPanel;
@@ -143,6 +149,32 @@ public class InfoPanelController : MonoBehaviour
         if (coordinatesText != null)
             coordinatesText.text = data.GetFormattedCoordinates();
         
+        // Actualizar lugares cercanos
+        if (data.HasNearbyPlaces())
+        {
+            if (nearbyPlacesText != null)
+            {
+                nearbyPlacesText.text = data.nearby_places;
+            }
+            
+            if (nearbyPlacesContainer != null)
+            {
+                nearbyPlacesContainer.SetActive(true);
+            }
+            
+            Debug.Log($"[InfoPanelController] ? Mostrando lugares cercanos: {data.nearby_places}");
+        }
+        else
+        {
+            // Ocultar la sección de lugares cercanos si no hay datos
+            if (nearbyPlacesContainer != null)
+            {
+                nearbyPlacesContainer.SetActive(false);
+            }
+            
+            Debug.Log("[InfoPanelController] ?? No hay lugares cercanos para mostrar");
+        }
+        
         // Ocultar loading
         HideLoading();
         
@@ -168,6 +200,7 @@ public class InfoPanelController : MonoBehaviour
         if (titleText != null) titleText.gameObject.SetActive(false);
         if (descriptionText != null) descriptionText.gameObject.SetActive(false);
         if (coordinatesText != null) coordinatesText.gameObject.SetActive(false);
+        if (nearbyPlacesText != null) nearbyPlacesText.gameObject.SetActive(false);
         
         // FORZAR OPACIDAD
         ForceOpaque();
@@ -187,6 +220,10 @@ public class InfoPanelController : MonoBehaviour
         if (titleText != null) titleText.gameObject.SetActive(true);
         if (descriptionText != null) descriptionText.gameObject.SetActive(true);
         if (coordinatesText != null) coordinatesText.gameObject.SetActive(true);
+        if (nearbyPlacesText != null && nearbyPlacesContainer != null && nearbyPlacesContainer.activeSelf)
+        {
+            nearbyPlacesText.gameObject.SetActive(true);
+        }
         
         // FORZAR OPACIDAD
         ForceOpaque();

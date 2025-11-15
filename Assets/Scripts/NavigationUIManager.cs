@@ -1,12 +1,12 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
 /// <summary>
-/// Gestor de la interfaz de usuario para el sistema de navegaciÛn
-/// Muestra lista de lugares disponibles y controles de navegaciÛn
+/// Gestor de la interfaz de usuario para el sistema de navegaci√≥n
+/// Muestra lista de lugares disponibles y controles de navegaci√≥n
 /// </summary>
 public class NavigationUIManager : MonoBehaviour
 {
@@ -14,38 +14,38 @@ public class NavigationUIManager : MonoBehaviour
     [Tooltip("Panel principal con la lista de lugares")]
     public GameObject locationSelectionPanel;
     
-    [Tooltip("Panel mostrado durante la navegaciÛn")]
+    [Tooltip("Panel mostrado durante la navegaci√≥n")]
     public GameObject navigationActivePanel;
     
     [Header("Lista de Lugares")]
-    [Tooltip("ScrollView content donde se agregar·n los botones de lugares")]
+    [Tooltip("ScrollView content donde se agregar√°n los botones de lugares")]
     public Transform locationListContent;
     
-    [Tooltip("Prefab del botÛn para cada lugar")]
+    [Tooltip("Prefab del bot√≥n para cada lugar")]
     public GameObject locationButtonPrefab;
     
     [Tooltip("Texto de loading mientras carga la lista")]
     public TextMeshProUGUI loadingText;
     
-    [Header("Panel de NavegaciÛn Activa")]
+    [Header("Panel de Navegaci√≥n Activa")]
     [Tooltip("Texto que muestra el nombre del destino actual")]
     public TextMeshProUGUI destinationNameText;
     
     [Tooltip("Texto que muestra la distancia al destino")]
     public TextMeshProUGUI distanceText;
     
-    [Tooltip("Texto que muestra la direcciÛn cardinal")]
+    [Tooltip("Texto que muestra la direcci√≥n cardinal")]
     public TextMeshProUGUI directionText;
     
-    [Tooltip("BotÛn para cancelar la navegaciÛn")]
+    [Tooltip("Bot√≥n para cancelar la navegaci√≥n")]
     public Button cancelNavigationButton;
     
     [Header("Botones Principales")]
-    [Tooltip("BotÛn para abrir el panel de selecciÛn de lugares")]
+    [Tooltip("Bot√≥n para abrir el panel de selecci√≥n de lugares")]
     public Button openLocationPanelButton;
     
-    [Header("ConfiguraciÛn")]
-    [Tooltip("Cargar lista de lugares autom·ticamente al iniciar")]
+    [Header("Configuraci√≥n")]
+    [Tooltip("Cargar lista de lugares autom√°ticamente al iniciar")]
     public bool loadLocationsOnStart = true;
     
     private List<BuildingData> availableBuildings = new List<BuildingData>();
@@ -59,13 +59,13 @@ public class NavigationUIManager : MonoBehaviour
     
     void Start()
     {
-        Debug.Log("[NavigationUIManager] ?? Start llamado - Iniciando configuraciÛn...");
+        Debug.Log("[NavigationUIManager] ?? Start llamado - Iniciando configuraci√≥n...");
         StartCoroutine(InitializeWithDelay());
     }
     
     private IEnumerator InitializeWithDelay()
     {
-        // Esperar un frame para asegurar que todo estÈ inicializado
+        // Esperar un frame para asegurar que todo est√© inicializado
         yield return null;
         
         Initialize();
@@ -75,13 +75,13 @@ public class NavigationUIManager : MonoBehaviour
     {
         if (isInitialized)
         {
-            Debug.Log("[NavigationUIManager] ?? Ya est· inicializado, saltando...");
+            Debug.Log("[NavigationUIManager] ?? Ya est√° inicializado, saltando...");
             return;
         }
         
         Debug.Log("[NavigationUIManager] ?? Inicializando componentes...");
         
-        // Verificar y buscar el botÛn principal si no est· asignado
+        // Verificar y buscar el bot√≥n principal si no est√° asignado
         if (openLocationPanelButton == null)
         {
             Debug.LogWarning("[NavigationUIManager] ?? openLocationPanelButton no asignado, buscando...");
@@ -93,19 +93,19 @@ public class NavigationUIManager : MonoBehaviour
                 if (btn.gameObject.name == "OpenLocationPanelButton")
                 {
                     openLocationPanelButton = btn;
-                    Debug.Log("[NavigationUIManager] ? BotÛn encontrado autom·ticamente en hijos");
+                    Debug.Log("[NavigationUIManager] ? Bot√≥n encontrado autom√°ticamente en hijos");
                     break;
                 }
             }
             
-            // Si a˙n no lo encuentra, buscar en toda la escena
+            // Si a√∫n no lo encuentra, buscar en toda la escena
             if (openLocationPanelButton == null)
             {
                 GameObject buttonObj = GameObject.Find("OpenLocationPanelButton");
                 if (buttonObj != null)
                 {
                     openLocationPanelButton = buttonObj.GetComponent<Button>();
-                    Debug.Log("[NavigationUIManager] ? BotÛn encontrado en escena");
+                    Debug.Log("[NavigationUIManager] ? Bot√≥n encontrado en escena");
                 }
             }
         }
@@ -125,17 +125,17 @@ public class NavigationUIManager : MonoBehaviour
         
         if (openLocationPanelButton != null)
         {
-            // NO remover listeners anteriores - solo aÒadir el nuestro
+            // NO remover listeners anteriores - solo a√±adir el nuestro
             // openLocationPanelButton.onClick.RemoveAllListeners(); ? COMENTADO
             
-            // AÒadir nuestro listener
+            // A√±adir nuestro listener
             openLocationPanelButton.onClick.AddListener(OnOpenLocationPanelClicked);
             
-            Debug.Log($"[NavigationUIManager] ? Listener del botÛn '{openLocationPanelButton.gameObject.name}' configurado");
-            Debug.Log($"[NavigationUIManager] ?? BotÛn interactable: {openLocationPanelButton.interactable}");
+            Debug.Log($"[NavigationUIManager] ? Listener del bot√≥n '{openLocationPanelButton.gameObject.name}' configurado");
+            Debug.Log($"[NavigationUIManager] ?? Bot√≥n interactable: {openLocationPanelButton.interactable}");
             Debug.Log($"[NavigationUIManager] ?? Total de listeners en runtime ahora: {openLocationPanelButton.onClick.GetPersistentEventCount()}");
             
-            // Verificar si el listener se aÒadiÛ correctamente
+            // Verificar si el listener se a√±adi√≥ correctamente
             int listenerCount = 0;
             try
             {
@@ -147,18 +147,18 @@ public class NavigationUIManager : MonoBehaviour
             {
                 listenerCount = -1;
             }
-            Debug.Log($"[NavigationUIManager] ?? VerificaciÛn de listeners: {listenerCount}");
+            Debug.Log($"[NavigationUIManager] ?? Verificaci√≥n de listeners: {listenerCount}");
         }
         else
         {
-            Debug.LogError("[NavigationUIManager] ? openLocationPanelButton es NULL - El botÛn NO funcionar·!");
-            Debug.LogError("[NavigationUIManager] ?? SOLUCI”N: Asigna manualmente el botÛn en el Inspector");
+            Debug.LogError("[NavigationUIManager] ? openLocationPanelButton es NULL - El bot√≥n NO funcionar√°!");
+            Debug.LogError("[NavigationUIManager] ?? SOLUCI√ìN: Asigna manualmente el bot√≥n en el Inspector");
         }
         
         // Ocultar paneles al inicio
         HideAllPanels();
         
-        // Verificar referencias crÌticas
+        // Verificar referencias cr√≠ticas
         VerifyReferences();
         
         // Cargar lista de lugares
@@ -216,7 +216,7 @@ public class NavigationUIManager : MonoBehaviour
     {
         if (FirebaseManager.Instance == null)
         {
-            Debug.LogError("[NavigationUIManager] ? FirebaseManager no encontrado");
+            Debug.LogError("[NavigationUIManager] ‚ùå FirebaseManager no encontrado");
             return;
         }
         
@@ -224,13 +224,32 @@ public class NavigationUIManager : MonoBehaviour
         if (loadingText != null)
         {
             loadingText.gameObject.SetActive(true);
-            loadingText.text = "? Cargando lugares...";
+            loadingText.text = "‚è≥ Cargando lugares...";
         }
         
-        Debug.Log("[NavigationUIManager] ?? Cargando lugares desde Firebase...");
+        Debug.Log("[NavigationUIManager] üîç Cargando lugares desde Firebase...");
         
-        // Obtener todos los edificios
-        availableBuildings = await FirebaseManager.Instance.GetAllBuildingsAsync();
+        // Obtener todos los edificios/lugares
+        List<BuildingData> allBuildings = await FirebaseManager.Instance.GetAllBuildingsAsync();
+        
+        // Filtrar solo los que son type="edificio"
+        availableBuildings = new List<BuildingData>();
+        int filteredCount = 0;
+        
+        foreach (BuildingData building in allBuildings)
+        {
+            if (building.IsEdificio())
+            {
+                availableBuildings.Add(building);
+            }
+            else
+            {
+                filteredCount++;
+                Debug.Log($"[NavigationUIManager] ‚è≠Ô∏è '{building.name}' filtrado (type='{building.type}')");
+            }
+        }
+        
+        Debug.Log($"[NavigationUIManager] üìä Total cargados: {allBuildings.Count}, Edificios navegables: {availableBuildings.Count}, Filtrados: {filteredCount}");
         
         // Ocultar loading
         if (loadingText != null)
@@ -240,11 +259,18 @@ public class NavigationUIManager : MonoBehaviour
         
         if (availableBuildings.Count == 0)
         {
-            Debug.LogWarning("[NavigationUIManager] ?? No se encontraron lugares");
+            Debug.LogWarning("[NavigationUIManager] ‚ö†Ô∏è No se encontraron edificios navegables (type='edificio')");
+            
+            // Mostrar mensaje al usuario
+            if (loadingText != null)
+            {
+                loadingText.gameObject.SetActive(true);
+                loadingText.text = "No hay edificios disponibles para navegaci√≥n";
+            }
             return;
         }
         
-        Debug.Log($"[NavigationUIManager] ? Se cargaron {availableBuildings.Count} lugares");
+        Debug.Log($"[NavigationUIManager] ‚úÖ Se cargaron {availableBuildings.Count} edificios navegables");
         
         // Poblar la lista UI
         PopulateLocationList();
@@ -257,7 +283,7 @@ public class NavigationUIManager : MonoBehaviour
     {
         if (locationListContent == null || locationButtonPrefab == null)
         {
-            Debug.LogError("[NavigationUIManager] ? Faltan referencias de UI");
+            Debug.LogError("[NavigationUIManager] ‚ùå Faltan referencias de UI");
             return;
         }
         
@@ -267,28 +293,24 @@ public class NavigationUIManager : MonoBehaviour
             Destroy(child.gameObject);
         }
         
-        // Crear botÛn para cada lugar
+        // Crear bot√≥n para cada lugar
         foreach (BuildingData building in availableBuildings)
         {
             GameObject buttonObj = Instantiate(locationButtonPrefab, locationListContent);
             
-            // Configurar texto del botÛn - MEJORADO
+            // Configurar texto del bot√≥n - SOLO NOMBRE
             TextMeshProUGUI buttonText = buttonObj.GetComponentInChildren<TextMeshProUGUI>();
             if (buttonText != null)
             {
-                // Solo mostrar el nombre en grande, descripciÛn m·s pequeÒa debajo
-                string desc = building.description.Length > 60 
-                    ? building.description.Substring(0, 60) + "..." 
-                    : building.description;
+                // Solo mostrar el nombre en grande, sin descripci√≥n
+                buttonText.text = $"<size=28><b>{building.name}</b></size>";
                 
-                buttonText.text = $"<size=20><b>{building.name}</b></size>\n<size=14><color=#CCCCCC>{desc}</color></size>";
-                
-                // Asegurar alineaciÛn correcta
-                buttonText.alignment = TextAlignmentOptions.Left;
-                buttonText.margin = new Vector4(15, 10, 15, 10); // M·rgenes internos
+                // Asegurar alineaci√≥n centrada
+                buttonText.alignment = TextAlignmentOptions.Center;
+                buttonText.margin = new Vector4(15, 10, 15, 10); // M√°rgenes internos
             }
             
-            // Configurar click del botÛn
+            // Configurar click del bot√≥n
             Button button = buttonObj.GetComponent<Button>();
             if (button != null)
             {
@@ -297,7 +319,7 @@ public class NavigationUIManager : MonoBehaviour
             }
         }
         
-        Debug.Log($"[NavigationUIManager] ?? Lista de {availableBuildings.Count} lugares creada");
+        Debug.Log($"[NavigationUIManager] üîò Lista de {availableBuildings.Count} lugares creada");
     }
     
     /// <summary>
@@ -309,13 +331,13 @@ public class NavigationUIManager : MonoBehaviour
         
         Debug.Log($"[NavigationUIManager] ?? Lugar seleccionado: {building.name}");
         
-        // Ocultar panel de selecciÛn
+        // Ocultar panel de selecci√≥n
         if (locationSelectionPanel != null)
         {
             locationSelectionPanel.SetActive(false);
         }
         
-        // Iniciar navegaciÛn
+        // Iniciar navegaci√≥n
         if (AppModeManager.Instance != null)
         {
             AppModeManager.Instance.StartNavigation(building);
@@ -325,12 +347,12 @@ public class NavigationUIManager : MonoBehaviour
             Debug.LogError("[NavigationUIManager] ? AppModeManager.Instance es NULL");
         }
         
-        // Mostrar panel de navegaciÛn activa
+        // Mostrar panel de navegaci√≥n activa
         ShowNavigationUI();
     }
     
     /// <summary>
-    /// Muestra la UI de navegaciÛn activa
+    /// Muestra la UI de navegaci√≥n activa
     /// </summary>
     public void ShowNavigationUI()
     {
@@ -344,11 +366,11 @@ public class NavigationUIManager : MonoBehaviour
             destinationNameText.text = selectedDestination.name;
         }
         
-        Debug.Log("[NavigationUIManager] ? UI de navegaciÛn mostrada");
+        Debug.Log("[NavigationUIManager] ? UI de navegaci√≥n mostrada");
     }
     
     /// <summary>
-    /// Oculta la UI de navegaciÛn activa
+    /// Oculta la UI de navegaci√≥n activa
     /// </summary>
     public void HideNavigationUI()
     {
@@ -357,7 +379,7 @@ public class NavigationUIManager : MonoBehaviour
             navigationActivePanel.SetActive(false);
         }
         
-        Debug.Log("[NavigationUIManager] ?? UI de navegaciÛn ocultada");
+        Debug.Log("[NavigationUIManager] ?? UI de navegaci√≥n ocultada");
     }
     
     /// <summary>
@@ -380,7 +402,7 @@ public class NavigationUIManager : MonoBehaviour
     private void OnOpenLocationPanelClicked()
     {
         Debug.Log("[NavigationUIManager] ?? ============================================");
-        Debug.Log("[NavigationUIManager] ?? BOT”N 'NAVEGAR' PRESIONADO!");
+        Debug.Log("[NavigationUIManager] ?? BOT√ìN 'NAVEGAR' PRESIONADO!");
         Debug.Log("[NavigationUIManager] ?? ============================================");
         
         if (locationSelectionPanel == null)
@@ -392,15 +414,15 @@ public class NavigationUIManager : MonoBehaviour
         bool wasActive = locationSelectionPanel.activeSelf;
         locationSelectionPanel.SetActive(true);
         
-        string statusMessage = wasActive ? "ya estaba activo" : "ahora est· activo";
+        string statusMessage = wasActive ? "ya estaba activo" : "ahora est√° activo";
         Debug.Log($"[NavigationUIManager] ? Panel de lugares {statusMessage}");
         Debug.Log($"[NavigationUIManager] ?? Panel name: {locationSelectionPanel.name}");
         Debug.Log($"[NavigationUIManager] ?? Panel active: {locationSelectionPanel.activeSelf}");
         
-        // Recargar lista por si hubo cambios o si est· vacÌa
+        // Recargar lista por si hubo cambios o si est√° vac√≠a
         if (availableBuildings == null || availableBuildings.Count == 0)
         {
-            Debug.Log("[NavigationUIManager] ?? Lista vacÌa, cargando lugares...");
+            Debug.Log("[NavigationUIManager] ?? Lista vac√≠a, cargando lugares...");
             LoadAvailableLocations();
         }
         else
@@ -410,11 +432,11 @@ public class NavigationUIManager : MonoBehaviour
     }
     
     /// <summary>
-    /// Callback cuando se hace click en "Cancelar NavegaciÛn"
+    /// Callback cuando se hace click en "Cancelar Navegaci√≥n"
     /// </summary>
     private void OnCancelNavigationClicked()
     {
-        Debug.Log("[NavigationUIManager] ? NavegaciÛn cancelada por el usuario");
+        Debug.Log("[NavigationUIManager] ? Navegaci√≥n cancelada por el usuario");
         
         if (AppModeManager.Instance != null)
         {
@@ -426,7 +448,7 @@ public class NavigationUIManager : MonoBehaviour
     }
     
     /// <summary>
-    /// Actualiza los textos de distancia y direcciÛn en tiempo real
+    /// Actualiza los textos de distancia y direcci√≥n en tiempo real
     /// Debe ser llamado desde NavigationArrowController
     /// </summary>
     public void UpdateNavigationInfo(float distance, string direction)
@@ -444,7 +466,7 @@ public class NavigationUIManager : MonoBehaviour
     
     void Update()
     {
-        // Actualizar informaciÛn de navegaciÛn en tiempo real
+        // Actualizar informaci√≥n de navegaci√≥n en tiempo real
         if (navigationActivePanel != null && navigationActivePanel.activeSelf && selectedDestination != null)
         {
             if (LocationManager.Instance != null && LocationManager.Instance.IsGPSReady)
@@ -459,12 +481,12 @@ public class NavigationUIManager : MonoBehaviour
                     selectedDestination.longitude
                 );
                 
-                UpdateNavigationInfo(distance, GeoUtils.BearingToCardinal(bearing) + $" ({bearing:F0}∞)");
+                UpdateNavigationInfo(distance, GeoUtils.BearingToCardinal(bearing) + $" ({bearing:F0}¬∞)");
             }
         }
     }
     
-    // MÈtodo p˙blico para forzar reinicializaciÛn si es necesario
+    // M√©todo p√∫blico para forzar reinicializaci√≥n si es necesario
     public void ForceInitialize()
     {
         isInitialized = false;

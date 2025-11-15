@@ -199,7 +199,32 @@ public class FirebaseManager : MonoBehaviour
             if (snapshot.ContainsField("longitude"))
                 data.longitude = snapshot.GetValue<double>("longitude");
             
-            Debug.Log($"[FirebaseManager] ?? Documento parseado: {data.name}");
+            // Parsear nearby_places (string simple)
+            if (snapshot.ContainsField("nearby_places"))
+            {
+                data.nearby_places = snapshot.GetValue<string>("nearby_places");
+                if (!string.IsNullOrEmpty(data.nearby_places))
+                {
+                    Debug.Log($"[FirebaseManager] ?? Lugares cercanos encontrados: {data.nearby_places}");
+                }
+            }
+            else
+            {
+                data.nearby_places = "";
+            }
+            
+            // Parsear type (tipo de lugar)
+            if (snapshot.ContainsField("type"))
+            {
+                data.type = snapshot.GetValue<string>("type");
+                Debug.Log($"[FirebaseManager] ??? Tipo: {data.type}");
+            }
+            else
+            {
+                data.type = "";
+            }
+            
+            Debug.Log($"[FirebaseManager] ? Documento parseado: {data.name}");
         }
         catch (Exception ex)
         {
@@ -321,31 +346,41 @@ public class FirebaseManager : MonoBehaviour
                 "Biblioteca Central",
                 "Sistema bibliotecario moderno con recursos digitales e impresos",
                 13.7181033,
-                -89.2040915
+                -89.2040915,
+                "",
+                "edificio"
             ),
             new BuildingData(
                 "Facultad de Ingeniería",
                 "Edificio principal de la Facultad de Ingeniería y Arquitectura",
                 13.7185000,
-                -89.2045000
+                -89.2045000,
+                "",
+                "edificio"
             ),
             new BuildingData(
                 "Rectoría",
                 "Edificio administrativo central de la universidad",
                 13.7178000,
-                -89.2038000
+                -89.2038000,
+                "",
+                "edificio"
             ),
             new BuildingData(
                 "Cafetería Central",
                 "Principal área de comidas de la universidad",
                 13.7183000,
-                -89.2042000
+                -89.2042000,
+                "",
+                "edificio"
             ),
             new BuildingData(
                 "Auditorio Principal",
                 "Espacio para eventos y conferencias universitarias",
                 13.7180000,
-                -89.2040000
+                -89.2040000,
+                "",
+                "edificio"
             )
         };
     }

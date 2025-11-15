@@ -37,6 +37,10 @@ public class NavigationArrowController : MonoBehaviour
     [Range(1f, 20f)]
     public float positionSmoothSpeed = 10f;
     
+    [Header("Corrección de Orientación")]
+    [Tooltip("Marcar si el modelo de flecha apunta hacia atrás (invertido)")]
+    public bool invertArrowModel = true; // TRUE por defecto según el reporte
+    
     [Header("Configuración de Rotación")]
     [Tooltip("Suavizado de la rotación (menor = más suave, mayor = más responsivo)")]
     [Range(1f, 20f)]
@@ -100,6 +104,22 @@ public class NavigationArrowController : MonoBehaviour
     {
         if (!isNavigating || arrowInstance == null || currentDestination == null)
             return;
+        
+        // DEBUG: Mostrar estado cada 2 segundos
+        if (Time.frameCount % 120 == 0 && LocationManager.Instance != null && LocationManager.Instance.IsGPSReady)
+        {
+            Debug.Log($"????????????????????????????????????");
+            Debug.Log($"[NavigationArrowController] ?? ESTADO:");
+            Debug.Log($"  GPS Ready: {LocationManager.Instance.IsGPSReady}");
+            Debug.Log($"  Mi ubicación: {LocationManager.Instance.CurrentLatitude:F6}, {LocationManager.Instance.CurrentLongitude:F6}");
+            Debug.Log($"  Destino: {currentDestination.name} ({currentDestination.latitude:F6}, {currentDestination.longitude:F6})");
+            Debug.Log($"  Bearing dispositivo: {LocationManager.Instance.CurrentBearing:F1}°");
+            float bearingToDest = LocationManager.Instance.GetBearingToDestination(currentDestination.latitude, currentDestination.longitude);
+            Debug.Log($"  Bearing al destino: {bearingToDest:F1}°");
+            Debug.Log($"  Ángulo relativo: {(bearingToDest - LocationManager.Instance.CurrentBearing):F1}°");
+            Debug.Log($"  Distancia: {LocationManager.Instance.GetDistanceToDestination(currentDestination.latitude, currentDestination.longitude):F1}m");
+            Debug.Log($"????????????????????????????????????");
+        }
         
         UpdateArrowPosition();
         UpdateArrowRotation();
@@ -167,6 +187,10 @@ public class NavigationArrowController : MonoBehaviour
         // Instanciar la flecha EN LA POSICIÓN CORRECTA
         arrowInstance = Instantiate(arrowPrefab, initialPosition, initialRotation);
         arrowInstance.name = "NavigationArrow";
+        
+        // IMPORTANTE: NO hacer la flecha hija de la cámara
+        // Debe estar en el mundo para mantener orientación absoluta
+        arrowInstance.transform.SetParent(null);
         
         // Configurar escala
         baseScale = Vector3.one * arrowScale;
@@ -241,25 +265,100 @@ public class NavigationArrowController : MonoBehaviour
     
     /// <summary>
     /// Actualiza la rotación de la flecha para apuntar al destino
+    /// USA BEARING RELATIVO para que la flecha apunte correctamente
     /// </summary>
     private void UpdateArrowRotation()
     {
-        if (LocationManager.Instance == null || !LocationManager.Instance.IsGPSReady)
+        // Verificar LocationManager
+        if (LocationManager.Instance == null)
+        {
+            Debug.LogError("[NavigationArrowController] ? LocationManager.Instance es NULL!");
             return;
+        }
         
-        // Obtener ángulo relativo hacia el destino
-        float relativeAngle = LocationManager.Instance.GetRelativeAngleToDestination(
+        // Verificar destino
+        if (currentDestination == null)
+        {
+            Debug.LogWarning("[NavigationArrowController] ?? No hay destino establecido");
+            return;
+        }
+        
+        // Verificar GPS
+        if (!LocationManager.Instance.IsGPSReady)
+        {
+            if (Time.frameCount % 300 == 0)
+            {
+                Debug.LogWarning("[NavigationArrowController] ?? GPS no está listo");
+            }
+            return;
+        }
+        
+        // Obtener bearing ABSOLUTO hacia el destino (0-360° desde el Norte geográfico)
+        float bearingToDestination = LocationManager.Instance.GetBearingToDestination(
             currentDestination.latitude,
             currentDestination.longitude
         );
         
-        // El ángulo relativo ya considera la orientación del dispositivo
-        // Solo necesitamos rotarlo alrededor del eje Y
+        // Obtener bearing del dispositivo (hacia dónde apunta el teléfono)
+        float deviceBearing = LocationManager.Instance.CurrentBearing;
+        
+        // CLAVE: Calcular ángulo RELATIVO
+        // Esto hace que la flecha rote relativamente a tu orientación
+        float relativeAngle = bearingToDestination - deviceBearing;
+        
+        // Normalizar el ángulo a rango [-180, 180]
+        while (relativeAngle > 180f) relativeAngle -= 360f;
+        while (relativeAngle < -180f) relativeAngle += 360f;
+        
+        // DEBUG: Mostrar valores cada segundo
+        if (Time.frameCount % 60 == 0)
+        {
+            Debug.Log($"[NavigationArrowController] ???????????????????????????");
+            Debug.Log($"[NavigationArrowController] ?? Destino: {currentDestination.name}");
+            Debug.Log($"[NavigationArrowController] ?? Mi posición: {LocationManager.Instance.CurrentLatitude:F6}, {LocationManager.Instance.CurrentLongitude:F6}");
+            Debug.Log($"[NavigationArrowController] ?? Destino: {currentDestination.latitude:F6}, {currentDestination.longitude:F6}");
+            Debug.Log($"[NavigationArrowController] ?? Bearing al destino: {bearingToDestination:F1}° (desde Norte)");
+            Debug.Log($"[NavigationArrowController] ?? Bearing del dispositivo: {deviceBearing:F1}° (hacia dónde miras)");
+            Debug.Log($"[NavigationArrowController] ? Ángulo RELATIVO: {relativeAngle:F1}°");
+            Debug.Log($"[NavigationArrowController] ?? Interpretación:");
+            
+            if (Mathf.Abs(relativeAngle) < 10f)
+                Debug.Log($"[NavigationArrowController]    ? Flecha apunta HACIA ADELANTE");
+            else if (relativeAngle > 80f && relativeAngle < 100f)
+                Debug.Log($"[NavigationArrowController]    ? Flecha apunta a tu DERECHA");
+            else if (relativeAngle < -80f && relativeAngle > -100f)
+                Debug.Log($"[NavigationArrowController]    ? Flecha apunta a tu IZQUIERDA");
+            else if (Mathf.Abs(relativeAngle) > 170f)
+                Debug.Log($"[NavigationArrowController]    ? Flecha apunta HACIA ATRÁS");
+            else if (relativeAngle > 0)
+                Debug.Log($"[NavigationArrowController]    ? Flecha apunta ADELANTE-DERECHA");
+            else
+                Debug.Log($"[NavigationArrowController]    ? Flecha apunta ADELANTE-IZQUIERDA");
+                
+            Debug.Log($"[NavigationArrowController] ???????????????????????????");
+        }
+        
+        // ?? FIX PARA MODELO INVERTIDO:
+        // Si el modelo 3D de la flecha apunta hacia -Z en vez de +Z,
+        // necesitamos invertir la rotación agregando 180°
+        
+        // Establecer rotación objetivo
         targetYRotation = relativeAngle;
         
-        // Aplicar rotación suavizada
+        // Aplicar corrección si el modelo está invertido
+        if (invertArrowModel)
+        {
+            targetYRotation += 180f;
+        }
+        
+        // Normalizar a rango [0, 360)
+        targetYRotation = (targetYRotation + 360f) % 360f;
+        
+        // Crear la rotación objetivo
         Quaternion targetRotation = Quaternion.Euler(0, targetYRotation, 0);
-        arrowInstance.transform.rotation = Quaternion.Lerp(
+        
+        // Aplicar rotación suavizada
+        arrowInstance.transform.rotation = Quaternion.Slerp(
             arrowInstance.transform.rotation,
             targetRotation,
             Time.deltaTime * rotationSmoothSpeed
@@ -362,5 +461,42 @@ public class NavigationArrowController : MonoBehaviour
         }
         
         StopNavigation();
+    }
+    
+    /// <summary>
+    /// Dibuja gizmos para debugging - muestra hacia dónde apunta la flecha
+    /// </summary>
+    void OnDrawGizmos()
+    {
+        if (!isNavigating || arrowInstance == null)
+            return;
+        
+        // Línea verde mostrando la dirección de la flecha
+        Vector3 arrowPos = arrowInstance.transform.position;
+        Vector3 arrowForward = arrowInstance.transform.forward;
+        
+        Gizmos.color = Color.green;
+        Gizmos.DrawLine(arrowPos, arrowPos + arrowForward * 5f);
+        
+        // Esfera amarilla en la posición de la flecha
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(arrowPos, 0.2f);
+        
+        // Si GPS está listo, mostrar información adicional
+        if (LocationManager.Instance != null && LocationManager.Instance.IsGPSReady && currentDestination != null)
+        {
+            // Línea roja mostrando el bearing al destino (aproximado)
+            float bearingToDest = LocationManager.Instance.GetBearingToDestination(
+                currentDestination.latitude,
+                currentDestination.longitude
+            );
+            
+            float deviceBearing = LocationManager.Instance.CurrentBearing;
+            float relativeAngle = bearingToDest - deviceBearing;
+            
+            Vector3 directionToDest = Quaternion.Euler(0, relativeAngle, 0) * Vector3.forward;
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(arrowPos, arrowPos + directionToDest * 5f);
+        }
     }
 }
