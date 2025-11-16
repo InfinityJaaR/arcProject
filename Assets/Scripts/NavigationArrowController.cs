@@ -340,63 +340,23 @@ public class NavigationArrowController : MonoBehaviour
         // Obtener bearing ABSOLUTO hacia el objetivo (0-360° desde el Norte geográfico)
         float bearingToTarget = LocationManager.Instance.GetBearingToDestination(targetLat, targetLon);
         
-        // Obtener bearing del dispositivo (hacia dónde apunta el teléfono)
-        float deviceBearing = LocationManager.Instance.CurrentBearing;
+        // ? FIX: Rotar la flecha en el ESPACIO MUNDIAL usando el bearing absoluto
+        // La flecha debe apuntar al Norte geográfico cuando bearing = 0°
+        // y rotar en sentido horario según el bearing
         
-        // CLAVE: Calcular ángulo RELATIVO
-        // Esto hace que la flecha rote relativamente a tu orientación
-        float relativeAngle = bearingToTarget - deviceBearing;
-        
-        // Normalizar el ángulo a rango [-180, 180]
-        while (relativeAngle > 180f) relativeAngle -= 360f;
-        while (relativeAngle < -180f) relativeAngle += 360f;
-        
-        // DEBUG: Mostrar valores cada segundo
-        if (Time.frameCount % 60 == 0)
-        {
-            Debug.Log($"[NavigationArrowController] ?????????????????????");
-            Debug.Log($"[NavigationArrowController] ?? Objetivo: {targetName}");
-            Debug.Log($"[NavigationArrowController] ?? Mi posición: {LocationManager.Instance.CurrentLatitude:F6}, {LocationManager.Instance.CurrentLongitude:F6}");
-            Debug.Log($"[NavigationArrowController] ?? Objetivo: {targetLat:F6}, {targetLon:F6}");
-            Debug.Log($"[NavigationArrowController] ?? Bearing al objetivo: {bearingToTarget:F1}° (desde Norte)");
-            Debug.Log($"[NavigationArrowController] ?? Bearing del dispositivo: {deviceBearing:F1}° (hacia dónde miras)");
-            Debug.Log($"[NavigationArrowController] ? Ángulo RELATIVO: {relativeAngle:F1}°");
-            Debug.Log($"[NavigationArrowController] ?? Interpretación:");
-            
-            if (Mathf.Abs(relativeAngle) < 10f)
-                Debug.Log($"[NavigationArrowController]    ?? Flecha apunta HACIA ADELANTE");
-            else if (relativeAngle > 80f && relativeAngle < 100f)
-                Debug.Log($"[NavigationArrowController]    ?? Flecha apunta a tu DERECHA");
-            else if (relativeAngle < -80f && relativeAngle > -100f)
-                Debug.Log($"[NavigationArrowController]    ?? Flecha apunta a tu IZQUIERDA");
-            else if (Mathf.Abs(relativeAngle) > 170f)
-                Debug.Log($"[NavigationArrowController]    ?? Flecha apunta HACIA ATRÁS");
-            else if (relativeAngle > 0)
-                Debug.Log($"[NavigationArrowController]    ?? Flecha apunta ADELANTE-DERECHA");
-            else
-                Debug.Log($"[NavigationArrowController]    ?? Flecha apunta ADELANTE-IZQUIERDA");
-                
-            Debug.Log($"[NavigationArrowController] ?????????????????????");
-        }
-        
-        // ?? FIX PARA MODELO INVERTIDO:
-        // Si el modelo 3D de la flecha apunta hacia -Z en vez de +Z,
-        // necesitamos invertir la rotación agregando 180°
-        
-        // Establecer rotación objetivo
-        targetYRotation = relativeAngle;
+        float worldYRotation = bearingToTarget;
         
         // Aplicar corrección si el modelo está invertido
         if (invertArrowModel)
         {
-            targetYRotation += 180f;
+            worldYRotation += 180f;
         }
         
         // Normalizar a rango [0, 360)
-        targetYRotation = (targetYRotation + 360f) % 360f;
+        worldYRotation = (worldYRotation + 360f) % 360f;
         
-        // Crear la rotación objetivo
-        Quaternion targetRotation = Quaternion.Euler(0, targetYRotation, 0);
+        // Crear la rotación objetivo en ESPACIO MUNDIAL
+        Quaternion targetRotation = Quaternion.Euler(0, worldYRotation, 0);
         
         // Aplicar rotación suavizada
         arrowInstance.transform.rotation = Quaternion.Slerp(
@@ -404,6 +364,35 @@ public class NavigationArrowController : MonoBehaviour
             targetRotation,
             Time.deltaTime * rotationSmoothSpeed
         );
+        
+        // DEBUG: Mostrar valores cada 2 segundos
+        if (Time.frameCount % 120 == 0)
+        {
+            float deviceBearing = LocationManager.Instance.CurrentBearing;
+            float relativeAngle = bearingToTarget - deviceBearing;
+            while (relativeAngle > 180f) relativeAngle -= 360f;
+            while (relativeAngle < -180f) relativeAngle += 360f;
+            
+            Debug.Log($"[NavigationArrowController] ??????????");
+            Debug.Log($"[NavigationArrowController] ?? Objetivo: {targetName}");
+            Debug.Log($"[NavigationArrowController] ?? Mi posición: {LocationManager.Instance.CurrentLatitude:F6}, {LocationManager.Instance.CurrentLongitude:F6}");
+            Debug.Log($"[NavigationArrowController] ?? Objetivo: {targetLat:F6}, {targetLon:F6}");
+            Debug.Log($"[NavigationArrowController] ?? Bearing al objetivo: {bearingToTarget:F1}° (desde Norte)");
+            Debug.Log($"[NavigationArrowController] ?? Rotación flecha (mundo Y): {worldYRotation:F1}°");
+            Debug.Log($"[NavigationArrowController] ?? Bearing dispositivo: {deviceBearing:F1}°");
+            Debug.Log($"[NavigationArrowController] ?? Ángulo relativo: {relativeAngle:F1}°");
+            
+            if (Mathf.Abs(relativeAngle) < 10f)
+                Debug.Log($"[NavigationArrowController]    ? Objetivo está ADELANTE");
+            else if (relativeAngle > 80f && relativeAngle < 100f)
+                Debug.Log($"[NavigationArrowController]    ?? Objetivo está a tu DERECHA");
+            else if (relativeAngle < -80f && relativeAngle > -100f)
+                Debug.Log($"[NavigationArrowController]    ?? Objetivo está a tu IZQUIERDA");
+            else if (Mathf.Abs(relativeAngle) > 170f)
+                Debug.Log($"[NavigationArrowController]    ?? Objetivo está ATRÁS");
+                
+            Debug.Log($"[NavigationArrowController] ??????????");
+        }
         
         // Aplicar inclinación vertical opcional
         if (enableVerticalTilt)
