@@ -29,6 +29,9 @@ public class AppModeManager : MonoBehaviour
     [Tooltip("UI Manager de navegación")]
     public NavigationUIManager navigationUIManager;
     
+    [Tooltip("Gestor de navegación por grafo")]
+    public GraphNavigationManager graphNavigationManager;
+    
     [Header("Estado")]
     [SerializeField]
     private AppMode currentMode = AppMode.MARKER_TRACKING;
@@ -52,6 +55,9 @@ public class AppModeManager : MonoBehaviour
         
         if (multiImageSpawner == null)
             multiImageSpawner = FindAnyObjectByType<MultiImageSpawner>();
+        
+        if (graphNavigationManager == null)
+            graphNavigationManager = FindAnyObjectByType<GraphNavigationManager>();
         
         Debug.Log("[AppModeManager] Inicializado en modo: " + currentMode);
     }
@@ -106,9 +112,20 @@ public class AppModeManager : MonoBehaviour
         
         SetMode(AppMode.NAVIGATION);
         
-        if (navigationController != null)
+        // NUEVO: Usar GraphNavigationManager si está disponible
+        if (graphNavigationManager != null)
         {
-            navigationController.SetDestination(destination);
+            graphNavigationManager.StartNavigationToBuilding(destination);
+        }
+        else
+        {
+            Debug.LogWarning("[AppModeManager] ?? GraphNavigationManager no disponible, usando navegación directa");
+            
+            // Fallback a navegación directa (modo antiguo)
+            if (navigationController != null)
+            {
+                navigationController.SetDestination(destination);
+            }
         }
     }
     
@@ -165,6 +182,11 @@ public class AppModeManager : MonoBehaviour
         if (navigationController != null)
         {
             navigationController.enabled = true;
+            
+            // IMPORTANTE: Si GraphNavigationManager está activo, 
+            // no necesitamos llamar SetDestination aquí
+            // El GraphNavigationManager se encargará de eso
+            Debug.Log("[AppModeManager] ?? NavigationArrowController habilitado y listo");
         }
         
         if (navigationUIManager != null)
@@ -179,6 +201,12 @@ public class AppModeManager : MonoBehaviour
     private void DisableNavigation()
     {
         Debug.Log("[AppModeManager] ?? Desactivando Navigation");
+        
+        // Detener GraphNavigationManager
+        if (graphNavigationManager != null)
+        {
+            graphNavigationManager.StopNavigation();
+        }
         
         if (navigationController != null)
         {

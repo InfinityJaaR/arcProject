@@ -20,6 +20,9 @@ public class NavigationArrowController : MonoBehaviour
     [Tooltip("Texto para mostrar dirección (opcional)")]
     public TextMeshProUGUI directionText;
     
+    [Tooltip("Texto para mostrar el progreso de la ruta (opcional)")]
+    public TextMeshProUGUI progressText;
+    
     [Header("Configuración de Posicionamiento")]
     [Tooltip("Distancia de la flecha frente a la cámara (metros)")]
     public float arrowDistance = 2f;
@@ -73,6 +76,7 @@ public class NavigationArrowController : MonoBehaviour
     private GameObject arrowInstance;
     private BuildingData currentDestination;
     private bool isNavigating = false;
+    private bool useGraphNavigation = true; // NUEVO: usar navegación por grafo
     private Renderer arrowRenderer;
     private Vector3 baseScale;
     private float targetYRotation = 0f;
@@ -92,12 +96,19 @@ public class NavigationArrowController : MonoBehaviour
     
     void Start()
     {
-        // Suscribirse a eventos del LocationManager
-        if (LocationManager.Instance != null)
-        {
-            LocationManager.Instance.OnLocationUpdated += OnLocationUpdated;
-            LocationManager.Instance.OnBearingUpdated += OnBearingUpdated;
-        }
+        SubscribeToEvents();
+    }
+    
+    void OnEnable()
+    {
+        // Re-suscribirse a eventos cada vez que se habilita el componente
+        SubscribeToEvents();
+    }
+    
+    void OnDisable()
+    {
+        // Desuscribirse cuando se deshabilita
+        UnsubscribeFromEvents();
     }
     
     void Update()
@@ -132,7 +143,7 @@ public class NavigationArrowController : MonoBehaviour
     }
     
     /// <summary>
-    /// Establece el destino y comienza la navegación
+    /// Establece el destino y empieza la navegación
     /// </summary>
     public void SetDestination(BuildingData destination)
     {
@@ -266,6 +277,7 @@ public class NavigationArrowController : MonoBehaviour
     /// <summary>
     /// Actualiza la rotación de la flecha para apuntar al destino
     /// USA BEARING RELATIVO para que la flecha apunte correctamente
+    /// NUEVO: Apunta al nodo más cercano en la ruta si se usa navegación por grafo
     /// </summary>
     private void UpdateArrowRotation()
     {
@@ -273,13 +285,6 @@ public class NavigationArrowController : MonoBehaviour
         if (LocationManager.Instance == null)
         {
             Debug.LogError("[NavigationArrowController] ? LocationManager.Instance es NULL!");
-            return;
-        }
-        
-        // Verificar destino
-        if (currentDestination == null)
-        {
-            Debug.LogWarning("[NavigationArrowController] ?? No hay destino establecido");
             return;
         }
         
@@ -293,18 +298,54 @@ public class NavigationArrowController : MonoBehaviour
             return;
         }
         
-        // Obtener bearing ABSOLUTO hacia el destino (0-360° desde el Norte geográfico)
-        float bearingToDestination = LocationManager.Instance.GetBearingToDestination(
-            currentDestination.latitude,
-            currentDestination.longitude
-        );
+        // Determinar coordenadas del objetivo
+        double targetLat = 0;
+        double targetLon = 0;
+        string targetName = "";
+        
+        // NUEVO: Usar navegación por grafo si está disponible
+        if (useGraphNavigation && GraphNavigationManager.Instance != null && GraphNavigationManager.Instance.IsNavigating())
+        {
+            GraphNode currentTarget = GraphNavigationManager.Instance.GetCurrentTargetNode();
+            
+            if (currentTarget != null)
+            {
+                targetLat = currentTarget.Latitude;
+                targetLon = currentTarget.Longitude;
+                targetName = currentTarget.Name;
+            }
+            else
+            {
+                if (Time.frameCount % 120 == 0)
+                {
+                    Debug.LogWarning("[NavigationArrowController] ?? No hay nodo objetivo actual");
+                }
+                return;
+            }
+        }
+        else
+        {
+            // Navegación directa al destino (modo antiguo)
+            if (currentDestination == null)
+            {
+                Debug.LogWarning("[NavigationArrowController] ?? No hay destino establecido");
+                return;
+            }
+            
+            targetLat = currentDestination.latitude;
+            targetLon = currentDestination.longitude;
+            targetName = currentDestination.name;
+        }
+        
+        // Obtener bearing ABSOLUTO hacia el objetivo (0-360° desde el Norte geográfico)
+        float bearingToTarget = LocationManager.Instance.GetBearingToDestination(targetLat, targetLon);
         
         // Obtener bearing del dispositivo (hacia dónde apunta el teléfono)
         float deviceBearing = LocationManager.Instance.CurrentBearing;
         
         // CLAVE: Calcular ángulo RELATIVO
         // Esto hace que la flecha rote relativamente a tu orientación
-        float relativeAngle = bearingToDestination - deviceBearing;
+        float relativeAngle = bearingToTarget - deviceBearing;
         
         // Normalizar el ángulo a rango [-180, 180]
         while (relativeAngle > 180f) relativeAngle -= 360f;
@@ -313,29 +354,29 @@ public class NavigationArrowController : MonoBehaviour
         // DEBUG: Mostrar valores cada segundo
         if (Time.frameCount % 60 == 0)
         {
-            Debug.Log($"[NavigationArrowController] ???????????????????????????");
-            Debug.Log($"[NavigationArrowController] ?? Destino: {currentDestination.name}");
+            Debug.Log($"[NavigationArrowController] ?????????????????????");
+            Debug.Log($"[NavigationArrowController] ?? Objetivo: {targetName}");
             Debug.Log($"[NavigationArrowController] ?? Mi posición: {LocationManager.Instance.CurrentLatitude:F6}, {LocationManager.Instance.CurrentLongitude:F6}");
-            Debug.Log($"[NavigationArrowController] ?? Destino: {currentDestination.latitude:F6}, {currentDestination.longitude:F6}");
-            Debug.Log($"[NavigationArrowController] ?? Bearing al destino: {bearingToDestination:F1}° (desde Norte)");
+            Debug.Log($"[NavigationArrowController] ?? Objetivo: {targetLat:F6}, {targetLon:F6}");
+            Debug.Log($"[NavigationArrowController] ?? Bearing al objetivo: {bearingToTarget:F1}° (desde Norte)");
             Debug.Log($"[NavigationArrowController] ?? Bearing del dispositivo: {deviceBearing:F1}° (hacia dónde miras)");
             Debug.Log($"[NavigationArrowController] ? Ángulo RELATIVO: {relativeAngle:F1}°");
             Debug.Log($"[NavigationArrowController] ?? Interpretación:");
             
             if (Mathf.Abs(relativeAngle) < 10f)
-                Debug.Log($"[NavigationArrowController]    ? Flecha apunta HACIA ADELANTE");
+                Debug.Log($"[NavigationArrowController]    ?? Flecha apunta HACIA ADELANTE");
             else if (relativeAngle > 80f && relativeAngle < 100f)
-                Debug.Log($"[NavigationArrowController]    ? Flecha apunta a tu DERECHA");
+                Debug.Log($"[NavigationArrowController]    ?? Flecha apunta a tu DERECHA");
             else if (relativeAngle < -80f && relativeAngle > -100f)
-                Debug.Log($"[NavigationArrowController]    ? Flecha apunta a tu IZQUIERDA");
+                Debug.Log($"[NavigationArrowController]    ?? Flecha apunta a tu IZQUIERDA");
             else if (Mathf.Abs(relativeAngle) > 170f)
-                Debug.Log($"[NavigationArrowController]    ? Flecha apunta HACIA ATRÁS");
+                Debug.Log($"[NavigationArrowController]    ?? Flecha apunta HACIA ATRÁS");
             else if (relativeAngle > 0)
-                Debug.Log($"[NavigationArrowController]    ? Flecha apunta ADELANTE-DERECHA");
+                Debug.Log($"[NavigationArrowController]    ?? Flecha apunta ADELANTE-DERECHA");
             else
-                Debug.Log($"[NavigationArrowController]    ? Flecha apunta ADELANTE-IZQUIERDA");
+                Debug.Log($"[NavigationArrowController]    ?? Flecha apunta ADELANTE-IZQUIERDA");
                 
-            Debug.Log($"[NavigationArrowController] ???????????????????????????");
+            Debug.Log($"[NavigationArrowController] ?????????????????????");
         }
         
         // ?? FIX PARA MODELO INVERTIDO:
@@ -367,10 +408,7 @@ public class NavigationArrowController : MonoBehaviour
         // Aplicar inclinación vertical opcional
         if (enableVerticalTilt)
         {
-            float distance = LocationManager.Instance.GetDistanceToDestination(
-                currentDestination.latitude,
-                currentDestination.longitude
-            );
+            float distance = LocationManager.Instance.GetDistanceToDestination(targetLat, targetLon);
             
             // Inclinar hacia abajo si está cerca, hacia arriba si está lejos
             float tiltAngle = Mathf.Clamp(distance / 100f, -30f, 30f);
@@ -392,20 +430,57 @@ public class NavigationArrowController : MonoBehaviour
             return;
         }
         
-        float distance = LocationManager.Instance.GetDistanceToDestination(
-            currentDestination.latitude,
-            currentDestination.longitude
-        );
+        // Determinar objetivo actual
+        double targetLat = 0;
+        double targetLon = 0;
+        string targetName = "";
+        string destinationName = "";
         
-        float bearing = LocationManager.Instance.GetBearingToDestination(
-            currentDestination.latitude,
-            currentDestination.longitude
-        );
+        // NUEVO: Usar navegación por grafo
+        if (useGraphNavigation && GraphNavigationManager.Instance != null && GraphNavigationManager.Instance.IsNavigating())
+        {
+            GraphNode currentTarget = GraphNavigationManager.Instance.GetCurrentTargetNode();
+            GraphNode finalDestination = GraphNavigationManager.Instance.GetFinalDestinationNode();
+            
+            if (currentTarget != null)
+            {
+                targetLat = currentTarget.Latitude;
+                targetLon = currentTarget.Longitude;
+                targetName = currentTarget.Name;
+            }
+            
+            if (finalDestination != null)
+            {
+                destinationName = finalDestination.Name;
+            }
+        }
+        else
+        {
+            // Navegación directa
+            if (currentDestination == null)
+                return;
+            
+            targetLat = currentDestination.latitude;
+            targetLon = currentDestination.longitude;
+            targetName = currentDestination.name;
+            destinationName = currentDestination.name;
+        }
+        
+        float distance = LocationManager.Instance.GetDistanceToDestination(targetLat, targetLon);
+        float bearing = LocationManager.Instance.GetBearingToDestination(targetLat, targetLon);
         
         // Actualizar texto de distancia
         if (distanceText != null)
         {
-            distanceText.text = $"{currentDestination.name}\n{GeoUtils.FormatDistance(distance)}";
+            // Si el nodo actual es diferente del destino final, mostrar ambos
+            if (useGraphNavigation && !string.IsNullOrEmpty(destinationName) && targetName != destinationName)
+            {
+                distanceText.text = $"? {targetName}\n{GeoUtils.FormatDistance(distance)}\n\n?? Destino: {destinationName}";
+            }
+            else
+            {
+                distanceText.text = $"{targetName}\n{GeoUtils.FormatDistance(distance)}";
+            }
         }
         
         // Actualizar texto de dirección
@@ -413,6 +488,16 @@ public class NavigationArrowController : MonoBehaviour
         {
             string cardinal = GeoUtils.BearingToCardinal(bearing);
             directionText.text = $"{cardinal} ({bearing:F0}°)";
+        }
+        
+        // Actualizar texto de progreso
+        if (progressText != null && useGraphNavigation && GraphNavigationManager.Instance != null)
+        {
+            var progress = GraphNavigationManager.Instance.GetProgress();
+            if (progress.total > 0)
+            {
+                progressText.text = $"Nodo {progress.current}/{progress.total}";
+            }
         }
         
         // Actualizar color según distancia
@@ -451,16 +536,119 @@ public class NavigationArrowController : MonoBehaviour
         // La rotación se actualiza en Update()
     }
     
+    /// <summary>
+    /// Callback cuando cambia el nodo objetivo en la ruta
+    /// </summary>
+    private void OnTargetNodeChanged(GraphNode newTarget)
+    {
+        Debug.Log($"[NavigationArrowController] ?? Nuevo nodo objetivo: {newTarget.Name}");
+        Debug.Log($"[NavigationArrowController] ?? Coordenadas: {newTarget.Latitude:F6}, {newTarget.Longitude:F6}");
+        
+        // CRÍTICO: Actualizar el destino para que la flecha se muestre
+        if (newTarget.buildingData != null)
+        {
+            currentDestination = newTarget.buildingData;
+        }
+        else
+        {
+            // Crear un BuildingData temporal para este nodo
+            currentDestination = new BuildingData(
+                newTarget.Name,
+                "Nodo de navegación",
+                newTarget.Latitude,
+                newTarget.Longitude
+            );
+        }
+        
+        // Si la flecha no está activa, iniciarla ahora
+        if (!isNavigating)
+        {
+            Debug.Log($"[NavigationArrowController] ?? Iniciando flecha de navegación");
+            StartNavigation();
+        }
+    }
+    
+    /// <summary>
+    /// Callback cuando se alcanza el destino final
+    /// </summary>
+    private void OnDestinationReached(GraphNode destination)
+    {
+        Debug.Log($"[NavigationArrowController] ?? DESTINO ALCANZADO: {destination.Name}");
+        
+        // Aquí podrías mostrar una UI de celebración, sonido, etc.
+        // Por ahora solo detener la navegación
+        StopNavigation();
+    }
+    
+    /// <summary>
+    /// Callback cuando cambia el progreso en la ruta
+    /// </summary>
+    private void OnPathProgressChanged(int current, int total)
+    {
+        Debug.Log($"[NavigationArrowController] ?? Progreso: {current}/{total} nodos");
+    }
+    
     void OnDestroy()
     {
-        // Desuscribirse de eventos
+        UnsubscribeFromEvents();
+        StopNavigation();
+    }
+    
+    /// <summary>
+    /// Suscribirse a todos los eventos necesarios
+    /// </summary>
+    private void SubscribeToEvents()
+    {
+        // Suscribirse a eventos del LocationManager
+        if (LocationManager.Instance != null)
+        {
+            LocationManager.Instance.OnLocationUpdated -= OnLocationUpdated; // Evitar duplicados
+            LocationManager.Instance.OnBearingUpdated -= OnBearingUpdated;
+            
+            LocationManager.Instance.OnLocationUpdated += OnLocationUpdated;
+            LocationManager.Instance.OnBearingUpdated += OnBearingUpdated;
+            
+            Debug.Log("[NavigationArrowController] ?? Suscrito a LocationManager");
+        }
+        
+        // Suscribirse a eventos del GraphNavigationManager
+        if (GraphNavigationManager.Instance != null)
+        {
+            GraphNavigationManager.Instance.OnTargetNodeChanged -= OnTargetNodeChanged; // Evitar duplicados
+            GraphNavigationManager.Instance.OnDestinationReached -= OnDestinationReached;
+            GraphNavigationManager.Instance.OnPathProgressChanged -= OnPathProgressChanged;
+            
+            GraphNavigationManager.Instance.OnTargetNodeChanged += OnTargetNodeChanged;
+            GraphNavigationManager.Instance.OnDestinationReached += OnDestinationReached;
+            GraphNavigationManager.Instance.OnPathProgressChanged += OnPathProgressChanged;
+            
+            Debug.Log("[NavigationArrowController] ?? Suscrito a GraphNavigationManager");
+        }
+    }
+    
+    /// <summary>
+    /// Desuscribirse de todos los eventos
+    /// </summary>
+    private void UnsubscribeFromEvents()
+    {
+        // Desuscribirse de eventos del LocationManager
         if (LocationManager.Instance != null)
         {
             LocationManager.Instance.OnLocationUpdated -= OnLocationUpdated;
             LocationManager.Instance.OnBearingUpdated -= OnBearingUpdated;
+            
+            Debug.Log("[NavigationArrowController] ?? Desuscrito de LocationManager");
         }
         
-        StopNavigation();
+        // Desuscribirse de eventos del GraphNavigationManager
+        if (GraphNavigationManager.Instance != null)
+        {
+            GraphNavigationManager.Instance.OnTargetNodeChanged -= OnTargetNodeChanged;
+            GraphNavigationManager.Instance.OnDestinationReached -= OnDestinationReached;
+            GraphNavigationManager.Instance.OnPathProgressChanged -= OnPathProgressChanged;
+            
+            Debug.Log("[NavigationArrowController] ?? Desuscrito de GraphNavigationManager");
+        }
     }
     
     /// <summary>
