@@ -479,4 +479,29 @@ public class GraphNavigationManager : MonoBehaviour
         
         return pathNodes;
     }
+    
+    /// <summary>
+    /// Obtiene todos los nodos del grafo (para minimapa)
+    /// </summary>
+    public Dictionary<string, GraphNode> GetAllGraphNodes()
+    {
+        return graphNodes;
+    }
+    
+    /// <summary>
+    /// Obtiene todos los edges del grafo (para minimapa)
+    /// </summary>
+    public List<GraphEdge> GetAllGraphEdges()
+    {
+        return graphEdges;
+    }
+    
+    /// <summary>
+    /// Verifica si el grafo está inicializado
+    /// </summary>
+    public bool IsGraphReady()
+    {
+        return graphNodes != null && graphNodes.Count > 0 && 
+               graphEdges != null && graphEdges.Count > 0;
+    }
 }
