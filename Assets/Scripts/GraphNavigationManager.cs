@@ -1,21 +1,34 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Gestor de navegaci�n basado en grafo
-/// Calcula rutas usando Dijkstra y gestiona el seguimiento de nodos
+/// Gestor de navegación basado en grafo.
+/// Calcula rutas usando Dijkstra y gestiona el seguimiento de nodos 8
 /// </summary>
 public class GraphNavigationManager : MonoBehaviour
 {
     public static GraphNavigationManager Instance { get; private set; }
     
-    [Header("Configuraci�n")]
+    [Header("Configuración")]
     [Tooltip("Distancia en metros para considerar que llegaste a un nodo")]
     public float nodeReachedDistance = 10f;
     
     [Tooltip("Actualizar el nodo objetivo cada N segundos")]
     public float updateInterval = 1f;
+    
+    [Header("Recalculación de Ruta")]
+    [Tooltip("Activar recalculación automática si el usuario se desvía")]
+    public bool enableRouteRecalculation = true;
+    
+    [Tooltip("Distancia máxima en metros permitida desde la ruta antes de recalcular")]
+    public float maxDeviationDistance = 30f;
+    
+    [Tooltip("Tiempo mínimo en segundos entre recalculaciones (evita spam)")]
+    public float recalculationCooldown = 5f;
+    
+    [Tooltip("Verificar desviación cada N segundos")]
+    public float deviationCheckInterval = 2f;
     
     [Header("Estado")]
     [SerializeField] private bool isNavigating = false;
@@ -32,10 +45,15 @@ public class GraphNavigationManager : MonoBehaviour
     private GraphNode currentTargetNode;
     private GraphNode finalDestinationNode;
     
+    // Control de recalculación
+    private float lastRecalculationTime = 0f;
+    private float lastDeviationCheckTime = 0f;
+    
     // Eventos
     public System.Action<GraphNode> OnTargetNodeChanged;
     public System.Action<GraphNode> OnDestinationReached;
     public System.Action<int, int> OnPathProgressChanged; // (current, total)
+    public System.Action OnRouteRecalculated;
     
     void Awake()
     {
@@ -54,11 +72,11 @@ public class GraphNavigationManager : MonoBehaviour
     }
     
     /// <summary>
-    /// Inicializa el grafo de navegaci�n desde Firebase
+    /// Inicializa el grafo de navegación desde Firebase
     /// </summary>
     private IEnumerator InitializeGraph()
     {
-        Debug.Log("[GraphNavigationManager] ?? Inicializando grafo de navegaci�n...");
+        Debug.Log("[GraphNavigationManager] ?? Inicializando grafo de navegación...");
         
         if (FirebaseManager.Instance == null)
         {
@@ -69,7 +87,7 @@ public class GraphNavigationManager : MonoBehaviour
         
         Debug.Log("[GraphNavigationManager] ? FirebaseManager encontrado");
         
-        // Esperar a que Firebase est� listo
+        // Esperar a que Firebase esté listo
         int waitCount = 0;
         while (!FirebaseManager.Instance.IsReady())
         {
@@ -110,7 +128,7 @@ public class GraphNavigationManager : MonoBehaviour
         
         if (graphNodes.Count == 0 || graphEdges.Count == 0)
         {
-            Debug.LogError("[GraphNavigationManager] ? Grafo vac�o - verifica Firestore");
+            Debug.LogError("[GraphNavigationManager] ? Grafo vacío - verifica Firestore");
             Debug.LogError("[GraphNavigationManager] ?? Instrucciones: Assets/INSTRUCCIONES_FIRESTORE_GRAFO.md");
             yield break;
         }
@@ -124,7 +142,7 @@ public class GraphNavigationManager : MonoBehaviour
     }
     
     /// <summary>
-    /// Inicia la navegaci�n hacia un edificio destino
+    /// Inicia la navegación hacia un edificio destino
     /// </summary>
     public void StartNavigationToBuilding(BuildingData destination)
     {
@@ -133,7 +151,7 @@ public class GraphNavigationManager : MonoBehaviour
         if (pathfindingService == null)
         {
             Debug.LogError("[GraphNavigationManager] ? Grafo no inicializado - pathfindingService es null");
-            Debug.LogError("[GraphNavigationManager] ?? Aseg�rate de que Firestore est� configurado correctamente");
+            Debug.LogError("[GraphNavigationManager] ?? Asegúrate de que Firestore esté configurado correctamente");
             return;
         }
         
@@ -145,7 +163,7 @@ public class GraphNavigationManager : MonoBehaviour
         
         if (!LocationManager.Instance.IsGPSReady)
         {
-            Debug.LogError("[GraphNavigationManager] ? GPS no est� listo");
+            Debug.LogError("[GraphNavigationManager] ? GPS no está listo");
             Debug.LogError($"[GraphNavigationManager] ?? Lat: {LocationManager.Instance.CurrentLatitude}, Lon: {LocationManager.Instance.CurrentLongitude}");
             return;
         }
@@ -158,7 +176,7 @@ public class GraphNavigationManager : MonoBehaviour
         
         if (destinationNode == null)
         {
-            Debug.LogError($"[GraphNavigationManager] ? No se encontr� el nodo para {destination.name}");
+            Debug.LogError($"[GraphNavigationManager] ? No se encontró el nodo para {destination.name}");
             Debug.LogError($"[GraphNavigationManager] ?? Nodos disponibles en el grafo: {graphNodes.Count}");
             
             if (graphNodes.Count > 0)
@@ -179,7 +197,7 @@ public class GraphNavigationManager : MonoBehaviour
     }
     
     /// <summary>
-    /// Inicia la navegaci�n hacia un nodo espec�fico
+    /// Inicia la navegación hacia un nodo específico
     /// </summary>
     public void StartNavigationToNode(string nodeId)
     {
@@ -205,11 +223,11 @@ public class GraphNavigationManager : MonoBehaviour
                 return;
             }
             
-            // Encontrar el nodo m�s cercano a la posici�n actual
+            // Encontrar el nodo más cercano a la posición actual
             double currentLat = LocationManager.Instance.CurrentLatitude;
             double currentLon = LocationManager.Instance.CurrentLongitude;
             
-            Debug.Log($"[GraphNavigationManager] ?? Posici�n actual: {currentLat:F6}, {currentLon:F6}");
+            Debug.Log($"[GraphNavigationManager] ?? Posición actual: {currentLat:F6}, {currentLon:F6}");
             
             GraphNode startNode = pathfindingService.FindNearestNode(currentLat, currentLon);
             
@@ -219,13 +237,13 @@ public class GraphNavigationManager : MonoBehaviour
                 return;
             }
             
-            Debug.Log($"[GraphNavigationManager] ?? Nodo m�s cercano a tu posici�n: {startNode.Name}");
+            Debug.Log($"[GraphNavigationManager] ?? Nodo más cercano a tu posición: {startNode.Name}");
             
-            // ? NUEVO: Si ya est�s en el nodo destino o muy cerca, navega directo
+            // ? NUEVO: Si ya estás en el nodo destino o muy cerca, navega directo
             if (startNode.id == nodeId)
             {
-                Debug.Log($"[GraphNavigationManager] ?? Ya est�s en el destino o muy cerca");
-                Debug.Log($"[GraphNavigationManager] ?? Navegaci�n directa al destino");
+                Debug.Log($"[GraphNavigationManager] ?? Ya estás en el destino o muy cerca");
+                Debug.Log($"[GraphNavigationManager] ?? Navegación directa al destino");
                 
                 // Crear una ruta de un solo nodo (directo al destino)
                 currentPath = new List<string> { nodeId };
@@ -234,13 +252,13 @@ public class GraphNavigationManager : MonoBehaviour
                 currentPathIndex = 0;
                 isNavigating = true;
                 
-                Debug.Log($"[GraphNavigationManager] ? Navegaci�n iniciada (directa)");
+                Debug.Log($"[GraphNavigationManager] ? Navegación iniciada (directa)");
                 Debug.Log($"[GraphNavigationManager] ??? Ruta: Directo al destino");
                 
                 // Establecer el nodo objetivo
                 UpdateCurrentTarget();
                 
-                // Iniciar corrutina de actualizaci�n
+                // Iniciar corrutina de actualización
                 StartCoroutine(NavigationUpdateLoop());
                 return;
             }
@@ -252,7 +270,7 @@ public class GraphNavigationManager : MonoBehaviour
             
             if (currentPath == null || currentPath.Count == 0)
             {
-                Debug.LogError("[GraphNavigationManager] ? No se encontr� ruta");
+                Debug.LogError("[GraphNavigationManager] ? No se encontró ruta");
                 Debug.LogError($"[GraphNavigationManager] Nodo inicio: {startNode.Name} ({startNode.id})");
                 Debug.LogError($"[GraphNavigationManager] Nodo destino: {graphNodes[nodeId].Name} ({nodeId})");
                 return;
@@ -260,13 +278,13 @@ public class GraphNavigationManager : MonoBehaviour
             
             Debug.Log($"[GraphNavigationManager] ? Ruta calculada exitosamente");
             
-            // Configurar la navegaci�n
+            // Configurar la navegación
             destinationNodeId = nodeId;
             finalDestinationNode = graphNodes[nodeId];
             currentPathIndex = 0;
             isNavigating = true;
             
-            Debug.Log($"[GraphNavigationManager] ? Navegaci�n iniciada");
+            Debug.Log($"[GraphNavigationManager] ? Navegación iniciada");
             Debug.Log($"[GraphNavigationManager] ??? Ruta calculada: {currentPath.Count} nodos");
             
             // Establecer el primer nodo objetivo
@@ -274,21 +292,21 @@ public class GraphNavigationManager : MonoBehaviour
             UpdateCurrentTarget();
             Debug.Log($"[GraphNavigationManager] ? UpdateCurrentTarget() completado");
             
-            // Iniciar corrutina de actualizaci�n
+            // Iniciar corrutina de actualización
             Debug.Log($"[GraphNavigationManager] ?? Iniciando NavigationUpdateLoop...");
             StartCoroutine(NavigationUpdateLoop());
             Debug.Log($"[GraphNavigationManager] ? NavigationUpdateLoop iniciado");
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[GraphNavigationManager] ? EXCEPCI�N en StartNavigationToNode:");
+            Debug.LogError($"[GraphNavigationManager] ? EXCEPCIÓN en StartNavigationToNode:");
             Debug.LogError($"[GraphNavigationManager] Mensaje: {ex.Message}");
             Debug.LogError($"[GraphNavigationManager] Stack: {ex.StackTrace}");
         }
     }
     
     /// <summary>
-    /// Detiene la navegaci�n actual
+    /// Detiene la navegación actual
     /// </summary>
     public void StopNavigation()
     {
@@ -300,11 +318,11 @@ public class GraphNavigationManager : MonoBehaviour
         
         StopAllCoroutines();
         
-        Debug.Log("[GraphNavigationManager] ?? Navegaci�n detenida");
+        Debug.Log("[GraphNavigationManager] ?? Navegación detenida");
     }
     
     /// <summary>
-    /// Loop principal de actualizaci�n de navegaci�n
+    /// Loop principal de actualización de navegación
     /// </summary>
     private IEnumerator NavigationUpdateLoop()
     {
@@ -315,8 +333,198 @@ public class GraphNavigationManager : MonoBehaviour
             if (LocationManager.Instance == null || !LocationManager.Instance.IsGPSReady)
                 continue;
             
+            // Verificar progreso del nodo actual
             CheckNodeProgress();
+            
+            // Verificar desviación de la ruta
+            if (enableRouteRecalculation)
+            {
+                CheckRouteDeviation();
+            }
         }
+    }
+    
+    /// <summary>
+    /// Verifica si el usuario se ha desviado significativamente de la ruta
+    /// y recalcula si es necesario
+    /// </summary>
+    private void CheckRouteDeviation()
+    {
+        // Throttle: solo verificar cada deviationCheckInterval segundos.
+        if (Time.time - lastDeviationCheckTime < deviationCheckInterval)
+            return;
+        
+        lastDeviationCheckTime = Time.time;
+        
+        try
+        {
+            // Obtener posición actual del usuario
+            double currentLat = LocationManager.Instance.CurrentLatitude;
+            double currentLon = LocationManager.Instance.CurrentLongitude;
+            
+            Debug.Log($"[GraphNavigationManager] 🔍 Verificación de desviación:");
+            Debug.Log($"[GraphNavigationManager]    📍 Posición GPS actual: {currentLat:F6}, {currentLon:F6}");
+            
+            // NUEVA LÓGICA: Primero verificar si está cerca de algún nodo de la ruta actual
+            bool isNearRouteNode = false;
+            GraphNode nearestRouteNode = null;
+            float minDistanceToRoute = float.MaxValue;
+            
+            Debug.Log($"[GraphNavigationManager]    🔎 Verificando distancia a nodos de la ruta actual...");
+            
+            foreach (string nodeId in currentPath)
+            {
+                if (graphNodes.ContainsKey(nodeId))
+                {
+                    GraphNode routeNode = graphNodes[nodeId];
+                    float distanceToRouteNode = routeNode.DistanceTo(currentLat, currentLon);
+                    
+                    if (distanceToRouteNode < minDistanceToRoute)
+                    {
+                        minDistanceToRoute = distanceToRouteNode;
+                        nearestRouteNode = routeNode;
+                    }
+                    
+                    // Si está dentro de la tolerancia de algún nodo de la ruta, está OK
+                    if (distanceToRouteNode <= maxDeviationDistance)
+                    {
+                        isNearRouteNode = true;
+                    }
+                }
+            }
+            
+            Debug.Log($"[GraphNavigationManager]    📏 Distancia mínima a ruta: {minDistanceToRoute:F1}m (nodo: {nearestRouteNode?.Name})");
+            Debug.Log($"[GraphNavigationManager]    ✓ ¿Está cerca de la ruta?: {isNearRouteNode}");
+            
+            // Si está cerca de algún nodo de la ruta, NO es desviación
+            if (isNearRouteNode)
+            {
+                Debug.Log($"[GraphNavigationManager]    ✅ Usuario cerca de la ruta (dentro de {maxDeviationDistance}m)");
+                Debug.Log($"  - Nodo objetivo actual: {currentTargetNode?.Name}");
+                Debug.Log($"  - Distancia al objetivo: {currentTargetNode?.DistanceTo(currentLat, currentLon):F1}m");
+                Debug.Log($"  - Nodo más cercano en ruta: {nearestRouteNode?.Name}");
+                Debug.Log($"  - Distancia al más cercano: {minDistanceToRoute:F1}m");
+                Debug.Log($"  - ¿Está en la ruta?: true");
+                Debug.Log($"[GraphNavigationManager]    ✅ Usuario en ruta correcta - No recalcular");
+                return;
+            }
+            
+            // Si NO está cerca de ningún nodo de la ruta, buscar el nodo más cercano en TODO el grafo
+            Debug.Log($"[GraphNavigationManager]    ⚠️ Usuario lejos de la ruta (>{maxDeviationDistance}m)");
+            Debug.Log($"[GraphNavigationManager]    🔎 Buscando nodo más cercano en todo el grafo...");
+            
+            GraphNode nearestNode = pathfindingService.FindNearestNode(currentLat, currentLon);
+            
+            if (nearestNode == null)
+            {
+                Debug.LogWarning($"[GraphNavigationManager]    ⚠️ No se encontró nodo cercano - Abortando verificación");
+                return;
+            }
+            
+            Debug.Log($"[GraphNavigationManager]    ✅ Nodo más cercano encontrado: {nearestNode.Name}");
+            
+            // Calcular distancia al nodo más cercano global
+            float distanceToNearest = nearestNode.DistanceTo(currentLat, currentLon);
+            
+            // Calcular distancia al nodo objetivo actual
+            float distanceToCurrentTarget = 0f;
+            if (currentTargetNode != null)
+            {
+                distanceToCurrentTarget = currentTargetNode.DistanceTo(currentLat, currentLon);
+            }
+            
+            Debug.Log($"  - Nodo objetivo actual: {currentTargetNode?.Name}");
+            Debug.Log($"  - Distancia al objetivo: {distanceToCurrentTarget:F1}m");
+            Debug.Log($"  - Nodo más cercano (global): {nearestNode.Name}");
+            Debug.Log($"  - Distancia al más cercano: {distanceToNearest:F1}m");
+            Debug.Log($"  - Distancia mínima a ruta: {minDistanceToRoute:F1}m");
+            Debug.Log($"  - ¿Está en la ruta?: false");
+            
+            // CONDICIÓN DE RECALCULACIÓN:
+            // El nodo más cercano global debe estar significativamente más cerca que cualquier nodo de la ruta
+            // Y el usuario debe estar fuera de la tolerancia de la ruta
+            bool shouldRecalculate = distanceToNearest < minDistanceToRoute - 10f; // 10m de margen
+            
+            Debug.Log($"[GraphNavigationManager]    📊 ¿Debe recalcular? {shouldRecalculate}");
+            Debug.Log($"[GraphNavigationManager]       Razón: Nodo global ({distanceToNearest:F1}m) vs Ruta ({minDistanceToRoute:F1}m)");
+            
+            if (shouldRecalculate)
+            {
+                // Cooldown: no recalcular demasiado seguido
+                if (Time.time - lastRecalculationTime < recalculationCooldown)
+                {
+                    float timeRemaining = recalculationCooldown - (Time.time - lastRecalculationTime);
+                    Debug.Log($"[GraphNavigationManager] ⏸️ Cooldown activo, esperando {timeRemaining:F1}s");
+                    return;
+                }
+                
+                Debug.LogWarning($"[GraphNavigationManager] ⚠️ DESVIACIÓN DETECTADA!");
+                Debug.LogWarning($"[GraphNavigationManager]    📍 Usuario se desvió de la ruta planeada");
+                Debug.LogWarning($"[GraphNavigationManager]    🔄 Recalculando ruta desde {nearestNode.Name}...");
+                
+                RecalculateRouteFromCurrentPosition(nearestNode);
+            }
+            else
+            {
+                Debug.Log($"[GraphNavigationManager]    ⚠️ Usuario fuera de ruta pero no hay mejor alternativa");
+                Debug.Log($"[GraphNavigationManager]    ➡️ Continuar con ruta actual");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[GraphNavigationManager] ❌ EXCEPCIÓN en CheckRouteDeviation:");
+            Debug.LogError($"[GraphNavigationManager]    Mensaje: {ex.Message}");
+            Debug.LogError($"[GraphNavigationManager]    Stack: {ex.StackTrace}");
+        }
+    }
+    
+    /// <summary>
+    /// Recalcula la ruta desde la posición actual (nodo más cercano)
+    /// hacia el destino final
+    /// </summary>
+    private void RecalculateRouteFromCurrentPosition(GraphNode startNode)
+    {
+        if (finalDestinationNode == null)
+        {
+            Debug.LogError("[GraphNavigationManager] ❌ No hay destino final para recalcular");
+            return;
+        }
+        
+        Debug.Log($"[GraphNavigationManager] 🔄 RECALCULANDO RUTA:");
+        Debug.Log($"  - Desde: {startNode.Name}");
+        Debug.Log($"  - Hasta: {finalDestinationNode.Name}");
+        
+        // Calcular nueva ruta
+        List<string> newPath = pathfindingService.FindShortestPath(startNode.id, finalDestinationNode.id);
+        
+        if (newPath == null || newPath.Count == 0)
+        {
+            Debug.LogError("[GraphNavigationManager] ❌ No se pudo recalcular la ruta");
+            return;
+        }
+        
+        // Actualizar la ruta
+        currentPath = newPath;
+        currentPathIndex = 0;
+        lastRecalculationTime = Time.time;
+        
+        Debug.Log($"[GraphNavigationManager] ✅ Ruta recalculada: {currentPath.Count} nodos");
+        Debug.Log($"[GraphNavigationManager] 📍 Nueva ruta:");
+        
+        for (int i = 0; i < currentPath.Count; i++)
+        {
+            string nodeId = currentPath[i];
+            string nodeName = graphNodes.ContainsKey(nodeId) ? graphNodes[nodeId].Name : nodeId;
+            Debug.Log($"  {i + 1}. {nodeName}");
+        }
+        
+        // Actualizar el nodo objetivo
+        UpdateCurrentTarget();
+        
+        // Notificar recalculación
+        OnRouteRecalculated?.Invoke();
+        
+        Debug.Log($"[GraphNavigationManager] 🎯 Nuevo objetivo: {currentTargetNode.Name}");
     }
     
     /// <summary>
@@ -370,7 +578,7 @@ public class GraphNavigationManager : MonoBehaviour
             
             if (currentPath == null || currentPathIndex >= currentPath.Count)
             {
-                Debug.LogWarning($"[GraphNavigationManager] ?? currentPath inv�lido o �ndice fuera de rango");
+                Debug.LogWarning($"[GraphNavigationManager] ?? currentPath inválido o índice fuera de rango");
                 return;
             }
             
@@ -400,7 +608,7 @@ public class GraphNavigationManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[GraphNavigationManager] ? EXCEPCI�N en UpdateCurrentTarget:");
+            Debug.LogError($"[GraphNavigationManager] ? EXCEPCIÓN en UpdateCurrentTarget:");
             Debug.LogError($"[GraphNavigationManager] Mensaje: {ex.Message}");
             Debug.LogError($"[GraphNavigationManager] Stack: {ex.StackTrace}");
         }
@@ -441,7 +649,7 @@ public class GraphNavigationManager : MonoBehaviour
     }
     
     /// <summary>
-    /// Verifica si hay una navegaci�n activa
+    /// Verifica si hay una navegación activa
     /// </summary>
     public bool IsNavigating()
     {
@@ -497,7 +705,7 @@ public class GraphNavigationManager : MonoBehaviour
     }
     
     /// <summary>
-    /// Verifica si el grafo est� inicializado
+    /// Verifica si el grafo está inicializado
     /// </summary>
     public bool IsGraphReady()
     {

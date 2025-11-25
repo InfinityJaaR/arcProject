@@ -42,7 +42,7 @@ public class NavigationArrowController : MonoBehaviour
     
     [Header("Corrección de Orientación")]
     [Tooltip("Marcar si el modelo de flecha apunta hacia atrás (invertido)")]
-    public bool invertArrowModel = true; // TRUE por defecto según el reporte
+    public bool invertArrowModel = true; // TRUE por defecto según el reporte.
     
     [Header("Configuración de Rotación")]
     [Tooltip("Suavizado de la rotación (menor = más suave, mayor = más responsivo)")]
@@ -577,6 +577,19 @@ public class NavigationArrowController : MonoBehaviour
         Debug.Log($"[NavigationArrowController] ?? Progreso: {current}/{total} nodos");
     }
     
+    /// <summary>
+    /// Callback cuando la ruta se recalcula automáticamente
+    /// </summary>
+    private void OnRouteRecalculated()
+    {
+        Debug.Log("[NavigationArrowController] ?? RUTA RECALCULADA - Actualizando dirección");
+        // Aquí podrías añadir feedback visual adicional como:
+        // - Mostrar un mensaje temporal en pantalla
+        // - Vibrar el dispositivo
+        // - Reproducir un sonido
+        // - Cambiar temporalmente el color de la flecha
+    }
+    
     void OnDestroy()
     {
         UnsubscribeFromEvents();
@@ -597,7 +610,7 @@ public class NavigationArrowController : MonoBehaviour
             LocationManager.Instance.OnLocationUpdated += OnLocationUpdated;
             LocationManager.Instance.OnBearingUpdated += OnBearingUpdated;
             
-            Debug.Log("[NavigationArrowController] ?? Suscrito a LocationManager");
+            Debug.Log("[NavigationArrowController] ? Suscrito a LocationManager");
         }
         
         // Suscribirse a eventos del GraphNavigationManager
@@ -606,12 +619,14 @@ public class NavigationArrowController : MonoBehaviour
             GraphNavigationManager.Instance.OnTargetNodeChanged -= OnTargetNodeChanged; // Evitar duplicados
             GraphNavigationManager.Instance.OnDestinationReached -= OnDestinationReached;
             GraphNavigationManager.Instance.OnPathProgressChanged -= OnPathProgressChanged;
+            GraphNavigationManager.Instance.OnRouteRecalculated -= OnRouteRecalculated;
             
             GraphNavigationManager.Instance.OnTargetNodeChanged += OnTargetNodeChanged;
             GraphNavigationManager.Instance.OnDestinationReached += OnDestinationReached;
             GraphNavigationManager.Instance.OnPathProgressChanged += OnPathProgressChanged;
+            GraphNavigationManager.Instance.OnRouteRecalculated += OnRouteRecalculated;
             
-            Debug.Log("[NavigationArrowController] ?? Suscrito a GraphNavigationManager");
+            Debug.Log("[NavigationArrowController] ? Suscrito a GraphNavigationManager");
         }
     }
     
@@ -635,8 +650,9 @@ public class NavigationArrowController : MonoBehaviour
             GraphNavigationManager.Instance.OnTargetNodeChanged -= OnTargetNodeChanged;
             GraphNavigationManager.Instance.OnDestinationReached -= OnDestinationReached;
             GraphNavigationManager.Instance.OnPathProgressChanged -= OnPathProgressChanged;
+            GraphNavigationManager.Instance.OnRouteRecalculated -= OnRouteRecalculated;
             
-            Debug.Log("[NavigationArrowController] ?? Desuscrito de GraphNavigationManager");
+            Debug.Log("[NavigationArrowController] ?????? Desuscrito de GraphNavigationManager");
         }
     }
     
