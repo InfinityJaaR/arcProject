@@ -30,6 +30,10 @@ public class GraphNavigationManager : MonoBehaviour
     [Tooltip("Verificar desviación cada N segundos")]
     public float deviationCheckInterval = 2f;
     
+    [Header("Feedback de Desviación")]
+    [Tooltip("Distancia a la ruta para mostrar advertencia sin recalcular aún")]
+    public float deviationWarningDistance = 20f;
+    
     [Header("Estado")]
     [SerializeField] private bool isNavigating = false;
     [SerializeField] private string destinationNodeId;
@@ -48,12 +52,15 @@ public class GraphNavigationManager : MonoBehaviour
     // Control de recalculación
     private float lastRecalculationTime = 0f;
     private float lastDeviationCheckTime = 0f;
+    private RouteStatus currentRouteStatus = RouteStatus.Hidden;
+    private float lastRouteDistance = 0f;
     
     // Eventos
     public System.Action<GraphNode> OnTargetNodeChanged;
     public System.Action<GraphNode> OnDestinationReached;
     public System.Action<int, int> OnPathProgressChanged; // (current, total)
     public System.Action OnRouteRecalculated;
+    public System.Action<RouteStatus, float> OnRouteStatusChanged;
     
     void Awake()
     {
@@ -69,6 +76,20 @@ public class GraphNavigationManager : MonoBehaviour
     void Start()
     {
         StartCoroutine(InitializeGraph());
+    }
+    
+    void OnValidate()
+    {
+        if (maxDeviationDistance < 1f)
+        {
+            maxDeviationDistance = 1f;
+        }
+        
+        deviationWarningDistance = Mathf.Clamp(
+            deviationWarningDistance,
+            1f,
+            Mathf.Max(1f, maxDeviationDistance - 0.5f)
+        );
     }
     
     /// <summary>
@@ -257,6 +278,7 @@ public class GraphNavigationManager : MonoBehaviour
                 
                 // Establecer el nodo objetivo
                 UpdateCurrentTarget();
+                UpdateRouteStatus(RouteStatus.OnRoute, 0f);
                 
                 // Iniciar corrutina de actualización
                 StartCoroutine(NavigationUpdateLoop());
@@ -291,6 +313,7 @@ public class GraphNavigationManager : MonoBehaviour
             Debug.Log($"[GraphNavigationManager] ?? Llamando UpdateCurrentTarget()...");
             UpdateCurrentTarget();
             Debug.Log($"[GraphNavigationManager] ? UpdateCurrentTarget() completado");
+            UpdateRouteStatus(RouteStatus.OnRoute, 0f);
             
             // Iniciar corrutina de actualización
             Debug.Log($"[GraphNavigationManager] ?? Iniciando NavigationUpdateLoop...");
@@ -319,6 +342,7 @@ public class GraphNavigationManager : MonoBehaviour
         StopAllCoroutines();
         
         Debug.Log("[GraphNavigationManager] ?? Navegación detenida");
+        UpdateRouteStatus(RouteStatus.Hidden, 0f);
     }
     
     /// <summary>
@@ -399,6 +423,11 @@ public class GraphNavigationManager : MonoBehaviour
             // Si está cerca de algún nodo de la ruta, NO es desviación
             if (isNearRouteNode)
             {
+                var routeStatus = minDistanceToRoute <= deviationWarningDistance
+                    ? RouteStatus.OnRoute
+                    : RouteStatus.NearDeviation;
+                UpdateRouteStatus(routeStatus, minDistanceToRoute);
+                
                 Debug.Log($"[GraphNavigationManager]    ✅ Usuario cerca de la ruta (dentro de {maxDeviationDistance}m)");
                 Debug.Log($"  - Nodo objetivo actual: {currentTargetNode?.Name}");
                 Debug.Log($"  - Distancia al objetivo: {currentTargetNode?.DistanceTo(currentLat, currentLon):F1}m");
@@ -439,6 +468,8 @@ public class GraphNavigationManager : MonoBehaviour
             Debug.Log($"  - Distancia al más cercano: {distanceToNearest:F1}m");
             Debug.Log($"  - Distancia mínima a ruta: {minDistanceToRoute:F1}m");
             Debug.Log($"  - ¿Está en la ruta?: false");
+            
+            UpdateRouteStatus(RouteStatus.OffRoute, minDistanceToRoute);
             
             // CONDICIÓN DE RECALCULACIÓN:
             // El nodo más cercano global debe estar significativamente más cerca que cualquier nodo de la ruta
@@ -520,6 +551,7 @@ public class GraphNavigationManager : MonoBehaviour
         
         // Actualizar el nodo objetivo
         UpdateCurrentTarget();
+        UpdateRouteStatus(RouteStatus.OnRoute, 0f);
         
         // Notificar recalculación
         OnRouteRecalculated?.Invoke();
@@ -711,5 +743,23 @@ public class GraphNavigationManager : MonoBehaviour
     {
         return graphNodes != null && graphNodes.Count > 0 && 
                graphEdges != null && graphEdges.Count > 0;
+    }
+    
+    /// <summary>
+    /// Obtiene el estado actual respecto a la ruta.
+    /// </summary>
+    public RouteStatus GetCurrentRouteStatus()
+    {
+        return currentRouteStatus;
+    }
+    
+    private void UpdateRouteStatus(RouteStatus newStatus, float distanceToRoute)
+    {
+        if (newStatus == currentRouteStatus && Mathf.Approximately(distanceToRoute, lastRouteDistance))
+            return;
+        
+        currentRouteStatus = newStatus;
+        lastRouteDistance = distanceToRoute;
+        OnRouteStatusChanged?.Invoke(newStatus, distanceToRoute);
     }
 }
