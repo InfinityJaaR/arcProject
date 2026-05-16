@@ -4,6 +4,9 @@
 #
 google-services.json
 google-services.json.meta
+google-services-desktop.json
+google-services-desktop.json.meta
+Assets/Plugins/Android/FirebaseApp.androidlib/res/values/google-services.xml
 .utmp/
 /[Ll]ibrary/
 /[Tt]emp/

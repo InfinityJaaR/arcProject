@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:keep="@string/gcm_defaultSenderId,@string/google_storage_bucket,@string/project_id,@string/google_api_key,@string/google_crash_reporting_api_key,@string/google_app_id">
-  <string name="gcm_defaultSenderId" translatable="false">545691768361</string>
-  <string name="google_storage_bucket" translatable="false">studio-8639786516-73347.firebasestorage.app</string>
-  <string name="project_id" translatable="false">studio-8639786516-73347</string>
-  <string name="google_api_key" translatable="false">AIzaSyDALMh8rKW96BrB18H2Eb2Y1jIFZjBYx7E</string>
-  <string name="google_crash_reporting_api_key" translatable="false">AIzaSyDALMh8rKW96BrB18H2Eb2Y1jIFZjBYx7E</string>
-  <string name="google_app_id" translatable="false">1:545691768361:android:f65f5ae1fa2c3eae74ee38</string>
+  <string name="gcm_defaultSenderId" translatable="false">807389918305</string>
+  <string name="google_storage_bucket" translatable="false">arcproyect-37561.firebasestorage.app</string>
+  <string name="project_id" translatable="false">arcproyect-37561</string>
+  <string name="google_api_key" translatable="false">AIzaSyDK26SnguYSr8WxW_9kAwdIY1rKDRReSro</string>
+  <string name="google_crash_reporting_api_key" translatable="false">AIzaSyDK26SnguYSr8WxW_9kAwdIY1rKDRReSro</string>
+  <string name="google_app_id" translatable="false">1:807389918305:android:074abae33bbeda0486e620</string>
 </resources>
