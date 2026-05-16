@@ -5,15 +5,17 @@ using UnityEngine.Android;
 
 /// <summary>
 /// Gestor de permisos para Android
-/// Pide permisos de ubicaciÛn en runtime (requerido para Android 6.0+)
+/// Pide permisos de ubicaciùn en runtime (requerido para Android 6.0+)
 /// </summary>
 public class PermissionsManager : MonoBehaviour
 {
-    [Header("ConfiguraciÛn")]
-    [Tooltip("Pedir permisos autom·ticamente al iniciar")]
+    public static PermissionsManager Instance { get; private set; }
+
+    [Header("Configuraciùn")]
+    [Tooltip("Pedir permisos automùticamente al iniciar")]
     public bool requestOnStart = true;
     
-    [Tooltip("Mostrar di·logo explicativo antes de pedir permisos")]
+    [Tooltip("Mostrar diùlogo explicativo antes de pedir permisos")]
     public bool showRationale = false; // Cambiado a false para simplificar
     
     // Estado de permisos
@@ -23,6 +25,18 @@ public class PermissionsManager : MonoBehaviour
     // Callbacks
     public System.Action OnAllPermissionsGranted;
     public System.Action OnPermissionsDenied;
+
+    void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
     
     void Start()
     {
@@ -41,16 +55,16 @@ public class PermissionsManager : MonoBehaviour
         
         #if PLATFORM_ANDROID
         
-        // Verificar permisos de ubicaciÛn
+        // Verificar permisos de ubicaciùn
         bool hasLocationFine = Permission.HasUserAuthorizedPermission(Permission.FineLocation);
         bool hasLocationCoarse = Permission.HasUserAuthorizedPermission(Permission.CoarseLocation);
         
-        // Verificar permiso de c·mara
+        // Verificar permiso de cùmara
         bool hasCamera = Permission.HasUserAuthorizedPermission(Permission.Camera);
         
-        Debug.Log($"[PermissionsManager] ?? UbicaciÛn (Fine): {hasLocationFine}");
-        Debug.Log($"[PermissionsManager] ?? UbicaciÛn (Coarse): {hasLocationCoarse}");
-        Debug.Log($"[PermissionsManager] ?? C·mara: {hasCamera}");
+        Debug.Log($"[PermissionsManager] ?? Ubicaciùn (Fine): {hasLocationFine}");
+        Debug.Log($"[PermissionsManager] ?? Ubicaciùn (Coarse): {hasLocationCoarse}");
+        Debug.Log($"[PermissionsManager] ?? Cùmara: {hasCamera}");
         
         // Si faltan permisos, pedirlos
         if (!hasLocationFine || !hasLocationCoarse || !hasCamera)
@@ -59,14 +73,14 @@ public class PermissionsManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("[PermissionsManager] ? Todos los permisos ya est·n concedidos");
+            Debug.Log("[PermissionsManager] ? Todos los permisos ya estùn concedidos");
             locationPermissionGranted = true;
             cameraPermissionGranted = true;
             OnAllPermissionsGranted?.Invoke();
         }
         
         #else
-        // En Editor o iOS, asumir que los permisos est·n concedidos
+        // En Editor o iOS, asumir que los permisos estùn concedidos
         Debug.Log("[PermissionsManager] ?? No es Android, asumiendo permisos concedidos");
         locationPermissionGranted = true;
         cameraPermissionGranted = true;
@@ -100,14 +114,14 @@ public class PermissionsManager : MonoBehaviour
         // Pedir permisos usando la API de Unity
         Permission.RequestUserPermissions(permissions);
         
-        // Verificar permisos despuÈs de un breve delay
+        // Verificar permisos despuùs de un breve delay
         Invoke(nameof(CheckPermissionsResult), 1f);
         
         #endif
     }
     
     /// <summary>
-    /// Verifica el resultado de los permisos despuÈs de pedirlos
+    /// Verifica el resultado de los permisos despuùs de pedirlos
     /// </summary>
     private void CheckPermissionsResult()
     {
@@ -122,8 +136,8 @@ public class PermissionsManager : MonoBehaviour
         locationPermissionGranted = hasLocationFine || hasLocationCoarse;
         cameraPermissionGranted = hasCamera;
         
-        Debug.Log($"[PermissionsManager] ?? UbicaciÛn: {locationPermissionGranted}");
-        Debug.Log($"[PermissionsManager] ?? C·mara: {cameraPermissionGranted}");
+        Debug.Log($"[PermissionsManager] ?? Ubicaciùn: {locationPermissionGranted}");
+        Debug.Log($"[PermissionsManager] ?? Cùmara: {cameraPermissionGranted}");
         
         if (locationPermissionGranted && cameraPermissionGranted)
         {
@@ -142,7 +156,7 @@ public class PermissionsManager : MonoBehaviour
             Debug.LogWarning("[PermissionsManager] ? Faltan permisos necesarios");
             OnPermissionsDenied?.Invoke();
             
-            // Reintentar despuÈs de 2 segundos por si el usuario no respondiÛ a˙n
+            // Reintentar despuùs de 2 segundos por si el usuario no respondiù aùn
             Invoke(nameof(RetryPermissions), 2f);
         }
         
@@ -156,7 +170,7 @@ public class PermissionsManager : MonoBehaviour
     {
         #if PLATFORM_ANDROID
         
-        // Verificar una vez m·s
+        // Verificar una vez mùs
         bool hasLocationFine = Permission.HasUserAuthorizedPermission(Permission.FineLocation);
         bool hasLocationCoarse = Permission.HasUserAuthorizedPermission(Permission.CoarseLocation);
         bool hasCamera = Permission.HasUserAuthorizedPermission(Permission.Camera);
@@ -177,13 +191,13 @@ public class PermissionsManager : MonoBehaviour
         else
         {
             Debug.LogError("[PermissionsManager] ? Permisos denegados por el usuario");
-            Debug.LogWarning("[PermissionsManager] ?? La app no funcionar· correctamente sin permisos de ubicaciÛn");
+            Debug.LogWarning("[PermissionsManager] ?? La app no funcionarù correctamente sin permisos de ubicaciùn");
         }
         
         #endif
     }
     
-    // Propiedades p˙blicas
+    // Propiedades pùblicas
     public bool HasLocationPermission => locationPermissionGranted;
     public bool HasCameraPermission => cameraPermissionGranted;
     public bool HasAllPermissions => locationPermissionGranted && cameraPermissionGranted;

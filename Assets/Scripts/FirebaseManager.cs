@@ -1,6 +1,5 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using Firebase;
@@ -8,611 +7,535 @@ using Firebase.Firestore;
 using Firebase.Extensions;
 
 /// <summary>
-/// Gestor singleton para todas las operaciones con Firebase Firestore
-/// Maneja consultas directas por Document ID sin necesidad de queries complejas
+/// Gestor singleton para todas las operaciones con Firebase Firestore.
+/// Implementa IDataRepository para edificios y grafo de navegaciï¿½n.
 /// </summary>
-public class FirebaseManager : MonoBehaviour
+public class FirebaseManager : MonoBehaviour, IDataRepository
 {
     public static FirebaseManager Instance { get; private set; }
-    
-    [Header("Configuración de Firestore")]
-    [Tooltip("Nombre de la colección en Firestore donde están los edificios")]
+
+    [Header("Configuraciï¿½n de Firestore")]
+    [Tooltip("Nombre de la colecciï¿½n en Firestore donde estï¿½n los edificios")]
     public string collectionName = "buildingLocations";
-    
-    [Tooltip("Nombre de la colección donde están las aristas del grafo")]
+
+    [Tooltip("Nombre de la colecciï¿½n donde estï¿½n las aristas del grafo")]
     public string graphEdgesCollectionName = "graphEdges";
-    
-    [Tooltip("Habilitar caché local para evitar consultas repetidas al mismo documento")]
+
+    [Tooltip("Habilitar cachï¿½ local para evitar consultas repetidas al mismo documento")]
     public bool enableCache = true;
-    
+
+    [Header("Offline")]
+    public bool enableLocalPersistence = true;
+    public bool enableFirestorePersistence = true;
+    public bool IsUsingLocalSnapshot { get; private set; }
+
     [Header("Debug")]
     [Tooltip("Simular datos en Unity Editor (sin necesidad de Firebase)")]
     public bool simulateDataInEditor = false;
-    
+
     private FirebaseFirestore db;
     private bool isInitialized = false;
     private Dictionary<string, BuildingData> cache = new Dictionary<string, BuildingData>();
     private Dictionary<string, GraphNode> graphNodesCache = new Dictionary<string, GraphNode>();
     private List<GraphEdge> graphEdgesCache = new List<GraphEdge>();
-    
+
     void Awake()
     {
-        // Patrón Singleton
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
-        
+
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        
         InitializeFirebase();
     }
-    
-    /// <summary>
-    /// Inicializa Firebase y verifica que todas las dependencias estén disponibles
-    /// </summary>
+
+    public bool IsReady() => isInitialized;
+
+    public void ClearCache()
+    {
+        cache.Clear();
+        graphNodesCache.Clear();
+        graphEdgesCache.Clear();
+        Debug.Log("[FirebaseManager] Cache limpiada");
+    }
+
+    public int GetCacheCount()
+    {
+        return cache.Count + graphNodesCache.Count + graphEdgesCache.Count;
+    }
+
     private void InitializeFirebase()
     {
-        Debug.Log("[FirebaseManager] ?? Inicializando Firebase...");
-        
+        Debug.Log("[FirebaseManager] Inicializando Firebase...");
+
         FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task =>
         {
             var dependencyStatus = task.Result;
-            
+
             if (dependencyStatus == DependencyStatus.Available)
             {
                 db = FirebaseFirestore.DefaultInstance;
+
+                if (enableFirestorePersistence)
+                {
+                    db.Settings.PersistenceEnabled = true;
+                }
+
                 isInitialized = true;
-                Debug.Log("[FirebaseManager] ? Firebase inicializado correctamente");
-                Debug.Log($"[FirebaseManager] ?? Colección: '{collectionName}'");
-                Debug.Log($"[FirebaseManager] ?? Caché: {(enableCache ? "Activado" : "Desactivado")}");
+                Debug.Log("[FirebaseManager] Firebase inicializado correctamente");
+                Debug.Log($"[FirebaseManager] Colecciï¿½n: '{collectionName}'");
+                Debug.Log($"[FirebaseManager] Cachï¿½: {(enableCache ? "Activado" : "Desactivado")}");
             }
             else
             {
-                Debug.LogError($"[FirebaseManager] ? Error al inicializar Firebase: {dependencyStatus}");
-                Debug.LogError("[FirebaseManager] Verifica que google-services.json esté en Assets/ y sea válido");
+                Debug.LogError($"[FirebaseManager] Error al inicializar Firebase: {dependencyStatus}");
+                Debug.LogError("[FirebaseManager] Verifica que google-services.json estï¿½ en Assets/ y sea vï¿½lido");
             }
         });
     }
-    
-    /// <summary>
-    /// Obtiene datos de un edificio/lugar desde Firestore usando el ID del documento
-    /// Este método es asíncrono y debe usarse con await
-    /// </summary>
-    /// <param name="documentId">ID del documento en Firestore (ej: "8YLwj6VOhzT2KPzZDMF9")</param>
-    /// <returns>BuildingData con la información del lugar</returns>
+
     public async Task<BuildingData> GetBuildingDataAsync(string documentId)
     {
         if (string.IsNullOrEmpty(documentId))
         {
-            Debug.LogWarning("[FirebaseManager] ?? documentId está vacío");
+            Debug.LogWarning("[FirebaseManager] documentId estï¿½ vacï¿½o");
             return BuildingData.GetFallback(documentId);
         }
-        
-        // Simular datos en Unity Editor para testing sin Firebase
-        #if UNITY_EDITOR
+
+#if UNITY_EDITOR
         if (simulateDataInEditor)
         {
-            Debug.Log($"[FirebaseManager] ?? Modo simulación activo - Retornando datos de prueba");
-            await Task.Delay(500); // Simular latencia de red
+            Debug.Log("[FirebaseManager] Modo simulaciï¿½n activo - Retornando datos de prueba");
+            await Task.Delay(500);
             return new BuildingData(
                 $"Edificio de Prueba ({documentId.Substring(0, Math.Min(5, documentId.Length))}...)",
-                "Este es un dato simulado para testing en Unity Editor.\n\nEn build real se consultará Firebase.",
-                13.7181033,
-                -89.2040915
-            );
-        }
-        #endif
-        
-        // Revisar caché primero
-        if (enableCache && cache.ContainsKey(documentId))
-        {
-            Debug.Log($"[FirebaseManager] ? Datos de '{documentId}' obtenidos desde CACHÉ");
-            return cache[documentId];
-        }
-        
-        // Verificar que Firebase esté listo
-        if (!isInitialized)
-        {
-            Debug.LogWarning("[FirebaseManager] ?? Firebase no está inicializado aún, esperando...");
-            await Task.Delay(1000); // Esperar un segundo
-            
-            if (!isInitialized)
-            {
-                Debug.LogError("[FirebaseManager] ? Firebase no se pudo inicializar");
-                return BuildingData.GetFallback(documentId);
-            }
-        }
-        
-        try
-        {
-            Debug.Log($"[FirebaseManager] ?? Consultando Firestore: {collectionName}/{documentId}");
-            
-            // Consulta DIRECTA por ID de documento (no se usa Where())
-            DocumentReference docRef = db.Collection(collectionName).Document(documentId);
-            DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
-            
-            if (!snapshot.Exists)
-            {
-                Debug.LogWarning($"[FirebaseManager] ?? Documento '{documentId}' NO EXISTE en Firestore");
-                Debug.LogWarning($"[FirebaseManager] Verifica que el ID coincida con el nombre en Reference Image Library");
-                return BuildingData.GetNotFound(documentId);
-            }
-            
-            // Parsear datos del documento
-            BuildingData buildingData = ParseDocument(snapshot);
-            
-            // Guardar en caché
-            if (enableCache)
-            {
-                cache[documentId] = buildingData;
-                Debug.Log($"[FirebaseManager] ?? Datos guardados en caché");
-            }
-            
-            Debug.Log($"[FirebaseManager] ? Datos obtenidos exitosamente: '{buildingData.name}'");
-            return buildingData;
-        }
-        catch (FirebaseException ex)
-        {
-            // Manejar errores específicos de Firebase
-            Debug.LogError($"[FirebaseManager] ? Error Firebase: {ex.ErrorCode}");
-            Debug.LogError($"[FirebaseManager] Mensaje: {ex.Message}");
-            
-            // Error de permisos
-            if (ex.ErrorCode == 7) // PERMISSION_DENIED
-            {
-                Debug.LogError("[FirebaseManager] ?? PERMISSION_DENIED - Las reglas de Firestore están bloqueando la lectura");
-                Debug.LogError("[FirebaseManager] Solución: Firebase Console ? Firestore ? Reglas ? Cambiar a 'allow read: if true'");
-                return BuildingData.GetPermissionDenied(documentId);
-            }
-            
-            return BuildingData.GetFallback(documentId);
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"[FirebaseManager] ? Error al consultar Firestore: {ex.Message}");
-            Debug.LogError($"[FirebaseManager] Stack: {ex.StackTrace}");
-            return BuildingData.GetFallback(documentId);
-        }
-    }
-    
-    /// <summary>
-    /// Parsea un DocumentSnapshot de Firestore a un objeto BuildingData
-    /// Maneja campos opcionales con valores por defecto
-    /// </summary>
-    private BuildingData ParseDocument(DocumentSnapshot snapshot)
-    {
-        var data = new BuildingData();
-        
-        try
-        {
-            // Parsear campos - usar valores por defecto si no existen
-            if (snapshot.ContainsField("name"))
-                data.name = snapshot.GetValue<string>("name");
-            else
-                data.name = "Sin nombre";
-            
-            if (snapshot.ContainsField("description"))
-                data.description = snapshot.GetValue<string>("description");
-            else
-                data.description = "Sin descripción disponible";
-            
-            if (snapshot.ContainsField("latitude"))
-                data.latitude = snapshot.GetValue<double>("latitude");
-            
-            if (snapshot.ContainsField("longitude"))
-                data.longitude = snapshot.GetValue<double>("longitude");
-            
-            // Parsear nearby_places (string simple)
-            if (snapshot.ContainsField("nearby_places"))
-            {
-                data.nearby_places = snapshot.GetValue<string>("nearby_places");
-                if (!string.IsNullOrEmpty(data.nearby_places))
-                {
-                    Debug.Log($"[FirebaseManager] ?? Lugares cercanos encontrados: {data.nearby_places}");
-                }
-            }
-            else
-            {
-                data.nearby_places = "";
-            }
-            
-            // Parsear type (tipo de lugar)
-            if (snapshot.ContainsField("type"))
-            {
-                data.type = snapshot.GetValue<string>("type");
-                Debug.Log($"[FirebaseManager] ??? Tipo: {data.type}");
-            }
-            else
-            {
-                data.type = "";
-            }
-            
-            Debug.Log($"[FirebaseManager] ? Documento parseado: {data.name}");
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"[FirebaseManager] ? Error al parsear documento: {ex.Message}");
-        }
-        
-        return data;
-    }
-    
-    /// <summary>
-    /// Limpia la caché de datos (útil para refrescar información)
-    /// </summary>
-    public void ClearCache()
-    {
-        cache.Clear();
-        Debug.Log("[FirebaseManager] ??? Caché limpiada");
-    }
-    
-    /// <summary>
-    /// Verifica si Firebase está listo para consultas
-    /// </summary>
-    public bool IsReady()
-    {
-        return isInitialized;
-    }
-    
-    /// <summary>
-    /// Obtiene el número de elementos en caché
-    /// </summary>
-    public int GetCacheCount()
-    {
-        return cache.Count;
-    }
-    
-    /// <summary>
-    /// Obtiene todos los edificios/lugares disponibles en la colección de Firestore
-    /// Útil para mostrar una lista de destinos en la UI de navegación
-    /// </summary>
-    /// <returns>Lista de BuildingData con todos los lugares disponibles</returns>
-    public async Task<List<BuildingData>> GetAllBuildingsAsync()
-    {
-        Debug.Log("[FirebaseManager] ?? Obteniendo lista de todos los edificios...");
-        
-        #if UNITY_EDITOR
-        if (simulateDataInEditor)
-        {
-            Debug.Log("[FirebaseManager] ?? Modo simulación - Retornando datos de prueba");
-            await Task.Delay(300);
-            return GetSimulatedBuildings();
-        }
-        #endif
-        
-        if (!isInitialized)
-        {
-            Debug.LogWarning("[FirebaseManager] ?? Firebase no está inicializado");
-            await Task.Delay(1000);
-            
-            if (!isInitialized)
-            {
-                Debug.LogError("[FirebaseManager] ? No se pudo inicializar Firebase");
-                return new List<BuildingData>();
-            }
-        }
-        
-        try
-        {
-            Debug.Log($"[FirebaseManager] ?? Consultando toda la colección '{collectionName}'...");
-            
-            CollectionReference collectionRef = db.Collection(collectionName);
-            QuerySnapshot snapshot = await collectionRef.GetSnapshotAsync();
-            
-            List<BuildingData> buildings = new List<BuildingData>();
-            
-            foreach (DocumentSnapshot document in snapshot.Documents)
-            {
-                if (document.Exists)
-                {
-                    BuildingData building = ParseDocument(document);
-                    buildings.Add(building);
-                    
-                    // Guardar en caché
-                    if (enableCache)
-                    {
-                        cache[document.Id] = building;
-                    }
-                }
-            }
-            
-            Debug.Log($"[FirebaseManager] ? Se obtuvieron {buildings.Count} edificios");
-            return buildings;
-        }
-        catch (FirebaseException ex)
-        {
-            Debug.LogError($"[FirebaseManager] ? Error Firebase: {ex.ErrorCode}");
-            Debug.LogError($"[FirebaseManager] Mensaje: {ex.Message}");
-            
-            if (ex.ErrorCode == 7) // PERMISSION_DENIED
-            {
-                Debug.LogError("[FirebaseManager] ?? PERMISSION_DENIED - Verifica las reglas de Firestore");
-            }
-            
-            return new List<BuildingData>();
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"[FirebaseManager] ? Error al obtener edificios: {ex.Message}");
-            return new List<BuildingData>();
-        }
-    }
-    
-    /// <summary>
-    /// Retorna una lista de edificios simulados para testing en Unity Editor
-    /// </summary>
-    private List<BuildingData> GetSimulatedBuildings()
-    {
-        return new List<BuildingData>
-        {
-            new BuildingData(
-                "Biblioteca Central",
-                "Sistema bibliotecario moderno con recursos digitales e impresos",
+                "Este es un dato simulado para testing en Unity Editor.\n\nEn build real se consultarï¿½ Firebase.",
                 13.7181033,
                 -89.2040915,
                 "",
                 "edificio"
-            ),
-            new BuildingData(
-                "Facultad de Ingeniería",
-                "Edificio principal de la Facultad de Ingeniería y Arquitectura",
-                13.7185000,
-                -89.2045000,
-                "",
-                "edificio"
-            ),
-            new BuildingData(
-                "Rectoría",
-                "Edificio administrativo central de la universidad",
-                13.7178000,
-                -89.2038000,
-                "",
-                "edificio"
-            ),
-            new BuildingData(
-                "Cafetería Central",
-                "Principal área de comidas de la universidad",
-                13.7183000,
-                -89.2042000,
-                "",
-                "edificio"
-            ),
-            new BuildingData(
-                "Auditorio Principal",
-                "Espacio para eventos y conferencias universitarias",
-                13.7180000,
-                -89.2040000,
-                "",
-                "edificio"
-            )
-        };
-    }
-    
-    /// <summary>
-    /// Obtiene todos los edges del grafo desde Firestore
-    /// </summary>
-    /// <returns>Lista de GraphEdge que definen las conexiones entre nodos</returns>
-    public async Task<List<GraphEdge>> GetAllGraphEdgesAsync()
-    {
-        Debug.Log("[FirebaseManager] ?? Obteniendo edges del grafo...");
-        
-        #if UNITY_EDITOR
-        if (simulateDataInEditor)
-        {
-            Debug.Log("[FirebaseManager] ?? Modo simulación - Retornando edges de prueba");
-            await Task.Delay(300);
-            return GetSimulatedGraphEdges();
+            ) { documentId = documentId };
         }
-        #endif
-        
-        // Si ya están en caché, retornarlos
-        if (enableCache && graphEdgesCache.Count > 0)
+#endif
+
+        if (enableCache && cache.TryGetValue(documentId, out var cached))
         {
-            Debug.Log($"[FirebaseManager] ? Edges obtenidos desde CACHÉ ({graphEdgesCache.Count} edges)");
-            return graphEdgesCache;
+            Debug.Log($"[FirebaseManager] Datos de '{documentId}' obtenidos desde CACHï¿½");
+            return cached;
         }
-        
+
         if (!isInitialized)
         {
-            Debug.LogWarning("[FirebaseManager] ?? Firebase no está inicializado");
+            Debug.LogWarning("[FirebaseManager] Firebase no estï¿½ inicializado aï¿½n, esperando...");
             await Task.Delay(1000);
-            
+
             if (!isInitialized)
             {
-                Debug.LogError("[FirebaseManager] ? No se pudo inicializar Firebase");
-                return new List<GraphEdge>();
+                var offline = TryGetBuildingFromLocal(documentId);
+                if (offline != null) return offline;
+                Debug.LogError("[FirebaseManager] Firebase no se pudo inicializar");
+                return BuildingData.GetFallback(documentId);
             }
         }
-        
+
         try
         {
-            Debug.Log($"[FirebaseManager] ?? Consultando colección '{graphEdgesCollectionName}'...");
-            
-            CollectionReference collectionRef = db.Collection(graphEdgesCollectionName);
-            QuerySnapshot snapshot = await collectionRef.GetSnapshotAsync();
-            
-            Debug.Log($"[FirebaseManager] ?? Documentos en graphEdges: {snapshot.Documents.Count()}");
-            
-            List<GraphEdge> edges = new List<GraphEdge>();
-            int skippedCount = 0;
-            
+            Debug.Log($"[FirebaseManager] Consultando Firestore: {collectionName}/{documentId}");
+
+            DocumentSnapshot snapshot = await db.Collection(collectionName).Document(documentId).GetSnapshotAsync();
+
+            if (!snapshot.Exists)
+            {
+                Debug.LogWarning($"[FirebaseManager] Documento '{documentId}' NO EXISTE en Firestore");
+                return BuildingData.GetNotFound(documentId);
+            }
+
+            BuildingData buildingData = ParseDocument(snapshot);
+            buildingData.documentId = documentId;
+            IsUsingLocalSnapshot = false;
+
+            if (enableCache)
+                cache[documentId] = buildingData;
+
+            Debug.Log($"[FirebaseManager] Datos obtenidos: '{buildingData.name}'");
+            return buildingData;
+        }
+        catch (FirebaseException ex)
+        {
+            Debug.LogError($"[FirebaseManager] Error Firebase: {ex.ErrorCode} - {ex.Message}");
+
+            if (ex.ErrorCode == 7)
+            {
+                Debug.LogError("[FirebaseManager] PERMISSION_DENIED - Revisa reglas de Firestore");
+                return BuildingData.GetPermissionDenied(documentId);
+            }
+
+            var offline = TryGetBuildingFromLocal(documentId);
+            return offline ?? BuildingData.GetFallback(documentId);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[FirebaseManager] Error al consultar Firestore: {ex.Message}");
+            var offline = TryGetBuildingFromLocal(documentId);
+            return offline ?? BuildingData.GetFallback(documentId);
+        }
+    }
+
+    public async Task<List<BuildingData>> GetAllBuildingsAsync()
+    {
+        Debug.Log("[FirebaseManager] Obteniendo lista de todos los edificios...");
+
+#if UNITY_EDITOR
+        if (simulateDataInEditor)
+        {
+            await Task.Delay(300);
+            return GetSimulatedBuildings();
+        }
+#endif
+
+        if (!isInitialized)
+        {
+            await Task.Delay(1000);
+            if (!isInitialized)
+                return LoadBuildingsFromLocalOrEmpty();
+        }
+
+        try
+        {
+            Debug.Log($"[FirebaseManager] Consultando colecciï¿½n '{collectionName}'...");
+            QuerySnapshot snapshot = await db.Collection(collectionName).GetSnapshotAsync();
+            var buildings = new List<BuildingData>();
+
             foreach (DocumentSnapshot document in snapshot.Documents)
             {
-                if (document.Exists)
-                {
-                    GraphEdge edge = ParseGraphEdge(document);
-                    if (edge != null)
-                    {
-                        edges.Add(edge);
-                    }
-                    else
-                    {
-                        skippedCount++;
-                        Debug.LogWarning($"[FirebaseManager] ?? Edge saltado (parseado como null): {document.Id}");
-                    }
-                }
+                if (!document.Exists) continue;
+
+                BuildingData building = ParseDocument(document);
+                building.documentId = document.Id;
+                buildings.Add(building);
+
+                if (enableCache)
+                    cache[document.Id] = building;
             }
-            
-            Debug.Log($"[FirebaseManager] ?? Edges parseados exitosamente: {edges.Count}");
-            Debug.Log($"[FirebaseManager] ?? Edges saltados (inválidos): {skippedCount}");
-            
-            // Guardar en caché
-            if (enableCache)
+
+            IsUsingLocalSnapshot = false;
+            Debug.Log($"[FirebaseManager] Se obtuvieron {buildings.Count} edificios");
+            return buildings;
+        }
+        catch (FirebaseException ex)
+        {
+            Debug.LogError($"[FirebaseManager] Error Firebase: {ex.ErrorCode} - {ex.Message}");
+            return LoadBuildingsFromLocalOrEmpty();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[FirebaseManager] Error al obtener edificios: {ex.Message}");
+            return LoadBuildingsFromLocalOrEmpty();
+        }
+    }
+
+    public async Task<List<GraphEdge>> GetAllGraphEdgesAsync()
+    {
+#if UNITY_EDITOR
+        if (simulateDataInEditor)
+        {
+            await Task.Delay(200);
+            var simulated = GetSimulatedGraphEdges();
+            graphEdgesCache = simulated;
+            return simulated;
+        }
+#endif
+
+        if (enableCache && graphEdgesCache.Count > 0)
+            return graphEdgesCache;
+
+        if (!isInitialized)
+        {
+            await Task.Delay(1000);
+            if (!isInitialized)
+                return LoadEdgesFromLocalOrEmpty();
+        }
+
+        try
+        {
+            Debug.Log($"[FirebaseManager] Consultando colecciï¿½n '{graphEdgesCollectionName}'...");
+            QuerySnapshot snapshot = await db.Collection(graphEdgesCollectionName).GetSnapshotAsync();
+            var edges = new List<GraphEdge>();
+            int skipped = 0;
+
+            Debug.Log($"[FirebaseManager] Documentos en {graphEdgesCollectionName}: {snapshot.Count}");
+
+            foreach (DocumentSnapshot document in snapshot.Documents)
             {
-                graphEdgesCache = edges;
+                if (!document.Exists) continue;
+
+                GraphEdge edge = ParseGraphEdge(document);
+                if (edge != null)
+                    edges.Add(edge);
+                else
+                    skipped++;
             }
-            
-            Debug.Log($"[FirebaseManager] ? Se obtuvieron {edges.Count} edges del grafo");
+
+            graphEdgesCache = edges;
+            IsUsingLocalSnapshot = false;
+            Debug.Log($"[FirebaseManager] Edges parseados: {edges.Count}, saltados: {skipped}");
             return edges;
         }
         catch (FirebaseException ex)
         {
-            Debug.LogError($"[FirebaseManager] ? Error Firebase: {ex.ErrorCode}");
-            Debug.LogError($"[FirebaseManager] Mensaje: {ex.Message}");
-            
-            if (ex.ErrorCode == 7) // PERMISSION_DENIED
-            {
-                Debug.LogError("[FirebaseManager] ?? PERMISSION_DENIED - Verifica las reglas de Firestore");
-            }
-            
-            return new List<GraphEdge>();
+            Debug.LogError($"[FirebaseManager] Error Firebase edges: {ex.ErrorCode}");
+            return LoadEdgesFromLocalOrEmpty();
         }
         catch (Exception ex)
         {
-            Debug.LogError($"[FirebaseManager] ? Error al obtener edges: {ex.Message}");
-            Debug.LogError($"[FirebaseManager] Stack trace: {ex.StackTrace}");
-            return new List<GraphEdge>();
+            Debug.LogError($"[FirebaseManager] Error al obtener edges: {ex.Message}");
+            return LoadEdgesFromLocalOrEmpty();
         }
     }
-    
-    /// <summary>
-    /// Parsea un DocumentSnapshot de Firestore a un objeto GraphEdge
-    /// </summary>
+
+    public async Task<(Dictionary<string, GraphNode> nodes, List<GraphEdge> edges)> BuildNavigationGraphAsync()
+    {
+        Debug.Log("[FirebaseManager] Construyendo grafo de navegaciï¿½n...");
+
+        if (enableCache && graphNodesCache.Count > 0 && graphEdgesCache.Count > 0)
+        {
+            Debug.Log("[FirebaseManager] Grafo desde cachï¿½ en memoria");
+            return (graphNodesCache, graphEdgesCache);
+        }
+
+        if (!isInitialized && enableLocalPersistence && LocalDataStore.HasSnapshot())
+        {
+            var local = LocalDataStore.LoadGraph();
+            graphNodesCache = local.nodes;
+            graphEdgesCache = local.edges;
+            IsUsingLocalSnapshot = true;
+            return local;
+        }
+
+#if UNITY_EDITOR
+        if (simulateDataInEditor)
+        {
+            await Task.Delay(300);
+            var nodes = new Dictionary<string, GraphNode>();
+            foreach (var b in GetSimulatedBuildings())
+            {
+                string id = string.IsNullOrEmpty(b.documentId) ? b.name : b.documentId;
+                nodes[id] = new GraphNode(id, b);
+            }
+            var simEdges = GetSimulatedGraphEdges();
+            graphNodesCache = nodes;
+            graphEdgesCache = simEdges;
+            return (nodes, simEdges);
+        }
+#endif
+
+        if (!isInitialized)
+        {
+            Debug.LogError("[FirebaseManager] Firebase no inicializado");
+            return (new Dictionary<string, GraphNode>(), new List<GraphEdge>());
+        }
+
+        var graphNodes = new Dictionary<string, GraphNode>();
+
+        try
+        {
+            QuerySnapshot snapshot = await db.Collection(collectionName).GetSnapshotAsync();
+
+            foreach (DocumentSnapshot document in snapshot.Documents)
+            {
+                if (!document.Exists) continue;
+
+                BuildingData buildingData = ParseDocument(document);
+                buildingData.documentId = document.Id;
+                graphNodes[document.Id] = new GraphNode(document.Id, buildingData);
+            }
+
+            Debug.Log($"[FirebaseManager] Nodos creados: {graphNodes.Count}");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[FirebaseManager] Error al construir nodos: {ex.Message}");
+            if (enableLocalPersistence && LocalDataStore.HasSnapshot())
+            {
+                var local = LocalDataStore.LoadGraph();
+                graphNodesCache = local.nodes;
+                graphEdgesCache = local.edges;
+                IsUsingLocalSnapshot = true;
+                return local;
+            }
+            return (graphNodes, new List<GraphEdge>());
+        }
+
+        List<GraphEdge> edges = await GetAllGraphEdgesAsync();
+
+        if (enableCache)
+            graphNodesCache = graphNodes;
+
+        if (enableLocalPersistence && graphNodes.Count > 0)
+        {
+            LocalDataStore.SaveFromNodes(graphNodes, edges);
+            IsUsingLocalSnapshot = false;
+        }
+
+        Debug.Log($"[FirebaseManager] Grafo construido: {graphNodes.Count} nodos, {edges.Count} edges");
+        return (graphNodes, edges);
+    }
+
+    private BuildingData TryGetBuildingFromLocal(string documentId)
+    {
+        if (!enableLocalPersistence || !LocalDataStore.HasSnapshot())
+            return null;
+
+        foreach (var b in LocalDataStore.LoadBuildings())
+        {
+            if (b.documentId == documentId)
+            {
+                IsUsingLocalSnapshot = true;
+                if (enableCache)
+                    cache[documentId] = b;
+                Debug.Log($"[FirebaseManager] Building '{documentId}' from local snapshot");
+                return b;
+            }
+        }
+
+        return null;
+    }
+
+    private List<BuildingData> LoadBuildingsFromLocalOrEmpty()
+    {
+        if (!enableLocalPersistence || !LocalDataStore.HasSnapshot())
+            return new List<BuildingData>();
+
+        var list = LocalDataStore.LoadBuildings();
+        IsUsingLocalSnapshot = true;
+
+        if (enableCache)
+        {
+            foreach (var b in list)
+            {
+                if (!string.IsNullOrEmpty(b.documentId))
+                    cache[b.documentId] = b;
+            }
+        }
+
+        Debug.Log($"[FirebaseManager] {list.Count} edificios desde snapshot local");
+        return list;
+    }
+
+    private List<GraphEdge> LoadEdgesFromLocalOrEmpty()
+    {
+        if (!enableLocalPersistence || !LocalDataStore.HasSnapshot())
+            return new List<GraphEdge>();
+
+        var edges = LocalDataStore.LoadEdges();
+        graphEdgesCache = edges;
+        IsUsingLocalSnapshot = true;
+        Debug.Log($"[FirebaseManager] {edges.Count} edges desde snapshot local");
+        return edges;
+    }
+
+    private BuildingData ParseDocument(DocumentSnapshot snapshot)
+    {
+        var data = new BuildingData();
+
+        try
+        {
+            if (snapshot.ContainsField("name"))
+                data.name = snapshot.GetValue<string>("name") ?? "";
+
+            if (snapshot.ContainsField("description"))
+                data.description = snapshot.GetValue<string>("description") ?? "";
+
+            if (snapshot.ContainsField("latitude"))
+                data.latitude = Convert.ToDouble(snapshot.GetValue<object>("latitude"));
+
+            if (snapshot.ContainsField("longitude"))
+                data.longitude = Convert.ToDouble(snapshot.GetValue<object>("longitude"));
+
+            if (snapshot.ContainsField("nearby_places"))
+                data.nearby_places = snapshot.GetValue<string>("nearby_places") ?? "";
+
+            if (snapshot.ContainsField("type"))
+                data.type = snapshot.GetValue<string>("type") ?? "";
+
+            if (!string.IsNullOrEmpty(snapshot.Id))
+                data.documentId = snapshot.Id;
+
+            if (!string.IsNullOrEmpty(data.nearby_places))
+                Debug.Log($"[FirebaseManager] Lugares cercanos: {data.nearby_places}");
+
+            Debug.Log($"[FirebaseManager] Documento parseado: {data.name} (type={data.type})");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[FirebaseManager] Error al parsear documento: {ex.Message}");
+        }
+
+        return data;
+    }
+
     private GraphEdge ParseGraphEdge(DocumentSnapshot snapshot)
     {
         try
         {
-            Debug.Log($"[FirebaseManager] ?? Parseando edge: {snapshot.Id}");
-            
-            var edge = new GraphEdge();
-            
-            if (snapshot.ContainsField("source"))
+            Debug.Log($"[FirebaseManager] Parseando edge: {snapshot.Id}");
+
+            if (!snapshot.ContainsField("source") || !snapshot.ContainsField("target"))
             {
-                edge.source = snapshot.GetValue<string>("source");
-                Debug.Log($"[FirebaseManager]    source: '{edge.source}'");
-            }
-            else
-            {
-                Debug.LogWarning($"[FirebaseManager] ?? Edge sin campo 'source': {snapshot.Id}");
+                Debug.LogWarning($"[FirebaseManager] Edge sin source/target: {snapshot.Id}");
                 return null;
             }
-            
-            if (snapshot.ContainsField("target"))
+
+            string source = snapshot.GetValue<string>("source");
+            string target = snapshot.GetValue<string>("target");
+
+            if (string.IsNullOrEmpty(source) || string.IsNullOrEmpty(target))
             {
-                edge.target = snapshot.GetValue<string>("target");
-                Debug.Log($"[FirebaseManager]    target: '{edge.target}'");
-            }
-            else
-            {
-                Debug.LogWarning($"[FirebaseManager] ?? Edge sin campo 'target': {snapshot.Id}");
+                Debug.LogWarning($"[FirebaseManager] Edge con source/target vacï¿½o: {snapshot.Id}");
                 return null;
             }
-            
+
+            double distance = 0;
             if (snapshot.ContainsField("distance"))
-            {
-                edge.distance = snapshot.GetValue<double>("distance");
-                Debug.Log($"[FirebaseManager]    distance: {edge.distance}m");
-            }
-            else
-            {
-                Debug.LogWarning($"[FirebaseManager] ?? Edge sin campo 'distance': {snapshot.Id}");
-                edge.distance = 0;
-            }
-            
-            Debug.Log($"[FirebaseManager] ? Edge parseado correctamente");
+                distance = Convert.ToDouble(snapshot.GetValue<object>("distance"));
+
+            Debug.Log($"[FirebaseManager]    source: '{source}'");
+            Debug.Log($"[FirebaseManager]    target: '{target}'");
+            Debug.Log($"[FirebaseManager]    distance: {distance}m");
+
+            var edge = new GraphEdge(source, target, distance);
+            Debug.Log("[FirebaseManager] Edge parseado correctamente");
             return edge;
         }
         catch (Exception ex)
         {
-            Debug.LogError($"[FirebaseManager] ? Error al parsear edge {snapshot.Id}: {ex.Message}");
-            Debug.LogError($"[FirebaseManager] Stack trace: {ex.StackTrace}");
+            Debug.LogError($"[FirebaseManager] Error al parsear edge {snapshot.Id}: {ex.Message}");
             return null;
         }
     }
-    
-    /// <summary>
-    /// Construye el grafo completo con nodos y edges
-    /// </summary>
-    public async Task<(Dictionary<string, GraphNode> nodes, List<GraphEdge> edges)> BuildNavigationGraphAsync()
+
+    private List<BuildingData> GetSimulatedBuildings()
     {
-        Debug.Log("[FirebaseManager] ??? Construyendo grafo de navegación...");
-        
-        // Obtener todos los nodos (edificios y nodos de inflexión)
-        List<BuildingData> allLocations = await GetAllBuildingsAsync();
-        
-        // Convertir a GraphNodes con sus IDs
-        var nodes = new Dictionary<string, GraphNode>();
-        
-        // Para obtener los IDs, necesitamos hacer una consulta que incluya los document IDs
-        // Vamos a reconstruir desde la consulta completa
-        
-        if (!isInitialized)
+        return new List<BuildingData>
         {
-            Debug.LogError("[FirebaseManager] ? Firebase no inicializado");
-            return (new Dictionary<string, GraphNode>(), new List<GraphEdge>());
-        }
-        
-        try
-        {
-            CollectionReference collectionRef = db.Collection(collectionName);
-            QuerySnapshot snapshot = await collectionRef.GetSnapshotAsync();
-            
-            foreach (DocumentSnapshot document in snapshot.Documents)
-            {
-                if (document.Exists)
-                {
-                    BuildingData buildingData = ParseDocument(document);
-                    GraphNode node = new GraphNode(document.Id, buildingData);
-                    nodes[document.Id] = node;
-                }
-            }
-            
-            Debug.Log($"[FirebaseManager] ? Nodos creados: {nodes.Count}");
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"[FirebaseManager] ? Error al construir nodos: {ex.Message}");
-        }
-        
-        // Obtener todos los edges
-        List<GraphEdge> edges = await GetAllGraphEdgesAsync();
-        
-        // Guardar en caché
-        if (enableCache)
-        {
-            graphNodesCache = nodes;
-        }
-        
-        Debug.Log($"[FirebaseManager] ? Grafo construido: {nodes.Count} nodos, {edges.Count} edges");
-        
-        return (nodes, edges);
+            new BuildingData("Biblioteca Central", "Edificio simulado", 13.7181033, -89.2040915, "Cafeterï¿½a", "edificio")
+                { documentId = "building_biblioteca" },
+            new BuildingData("Facultad de Ingenierï¿½a", "Edificio simulado", 13.7185, -89.2045, "", "edificio")
+                { documentId = "building_ingenieria" },
+            new BuildingData("Rectorï¿½a", "Edificio simulado", 13.7190, -89.2050, "", "edificio")
+                { documentId = "building_rectoria" },
+            new BuildingData("Nodo 1", "Nodo de inflexiï¿½n simulado", 13.7183, -89.2043, "", "nodo_de_inflexion")
+                { documentId = "node_1" },
+            new BuildingData("Nodo 2", "Nodo de inflexiï¿½n simulado", 13.7187, -89.2047, "", "nodo_de_inflexion")
+                { documentId = "node_2" }
+        };
     }
-    
-    /// <summary>
-    /// Retorna edges simulados para testing en Unity Editor
-    /// </summary>
+
     private List<GraphEdge> GetSimulatedGraphEdges()
     {
-        // Crear un grafo simple de prueba
-        // Biblioteca (0) <-> Nodo1 (1) <-> Ingeniería (2)
-        //                      |
-        //                   Nodo2 (3)
-        //                      |
-        //                  Rectoría (4)
-        
         return new List<GraphEdge>
         {
             new GraphEdge("building_biblioteca", "node_1", 50),

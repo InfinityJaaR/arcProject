@@ -4,7 +4,7 @@ using UnityEngine.XR.ARFoundation;
 using TMPro;
 
 /// <summary>
-/// Editor script para configurar autom·ticamente el sistema de navegaciÛn por grafo
+/// Editor script para configurar autom√°ticamente el sistema de navegaci√≥n por grafo
 /// Crea el GameObject GraphNavigationManager y asigna todas las referencias necesarias
 /// </summary>
 public class SetupGraphNavigation : EditorWindow
@@ -24,7 +24,7 @@ public class SetupGraphNavigation : EditorWindow
         
         GUILayout.Space(10);
         
-        // TÌtulo
+        // T√≠tulo
         GUIStyle titleStyle = new GUIStyle(EditorStyles.boldLabel);
         titleStyle.fontSize = 16;
         titleStyle.alignment = TextAnchor.MiddleCenter;
@@ -34,19 +34,19 @@ public class SetupGraphNavigation : EditorWindow
         GUILayout.Space(10);
         
         EditorGUILayout.HelpBox(
-            "Este asistente configurar· autom·ticamente el sistema de navegaciÛn por grafo:\n\n" +
-            "? Crear· el GameObject GraphNavigationManager\n" +
-            "? Asignar· todas las referencias necesarias\n" +
-            "? Configurar· los par·metros por defecto\n" +
-            "? Verificar· que todo estÈ correcto",
+            "Este asistente configurar√° autom√°ticamente el sistema de navegaci√≥n por grafo:\n\n" +
+            "? Crear√° el GameObject GraphNavigationManager\n" +
+            "? Asignar√° todas las referencias necesarias\n" +
+            "? Configurar√° los par√°metros por defecto\n" +
+            "? Verificar√° que todo est√© correcto",
             MessageType.Info
         );
         
         GUILayout.Space(20);
         
-        // BotÛn principal
+        // Bot√≥n principal
         GUI.backgroundColor = Color.green;
-        if (GUILayout.Button("?? Configurar Autom·ticamente", GUILayout.Height(40)))
+        if (GUILayout.Button("?? Configurar Autom√°ticamente", GUILayout.Height(40)))
         {
             SetupGraphNavigationSystem();
         }
@@ -55,26 +55,26 @@ public class SetupGraphNavigation : EditorWindow
         GUILayout.Space(20);
         
         EditorGUILayout.HelpBox(
-            "?? Aseg˙rate de que estÈs en la escena correcta antes de ejecutar esto.",
+            "?? Aseg√∫rate de que est√©s en la escena correcta antes de ejecutar esto.",
             MessageType.Warning
         );
         
         GUILayout.Space(10);
         
-        // BotÛn de verificaciÛn
-        if (GUILayout.Button("?? Verificar ConfiguraciÛn Actual", GUILayout.Height(30)))
+        // Bot√≥n de verificaci√≥n
+        if (GUILayout.Button("?? Verificar Configuraci√≥n Actual", GUILayout.Height(30)))
         {
             VerifyCurrentSetup();
         }
         
         GUILayout.Space(20);
         
-        // InformaciÛn adicional
-        EditorGUILayout.LabelField("DocumentaciÛn:", EditorStyles.boldLabel);
+        // Informaci√≥n adicional
+        EditorGUILayout.LabelField("Documentaci√≥n:", EditorStyles.boldLabel);
         EditorGUILayout.HelpBox(
-            "DespuÈs de la configuraciÛn, revisa:\n" +
-            "ï Assets/README_NAVEGACION_GRAFO.md\n" +
-            "ï Assets/INSTRUCCIONES_FIRESTORE_GRAFO.md",
+            "Despu√©s de la configuraci√≥n, revisa:\n" +
+            "¬ï Assets/docs/README_NAVEGACION_GRAFO.md\n" +
+            "¬ï Assets/docs/INSTRUCCIONES_FIRESTORE_GRAFO.md",
             MessageType.Info
         );
         
@@ -84,7 +84,7 @@ public class SetupGraphNavigation : EditorWindow
     private static void SetupGraphNavigationSystem()
     {
         Debug.Log("???????????????????????????????????????????????????????");
-        Debug.Log("?? INICIANDO CONFIGURACI”N AUTOM¡TICA DEL SISTEMA");
+        Debug.Log("?? INICIANDO CONFIGURACI√ìN AUTOM√ÅTICA DEL SISTEMA");
         Debug.Log("???????????????????????????????????????????????????????");
         
         int stepCount = 0;
@@ -109,9 +109,9 @@ public class SetupGraphNavigation : EditorWindow
             Debug.Log("   ? GraphNavigationManager ya existe");
         }
         
-        // PASO 2: Configurar par·metros por defecto
+        // PASO 2: Configurar par√°metros por defecto
         stepCount++;
-        Debug.Log($"\n[{stepCount}] ?? Configurando par·metros...");
+        Debug.Log($"\n[{stepCount}] ?? Configurando par√°metros...");
         
         SerializedObject so = new SerializedObject(graphNavManager);
         
@@ -151,7 +151,7 @@ public class SetupGraphNavigation : EditorWindow
             }
             else
             {
-                Debug.LogWarning("   ?? No se encontrÛ el campo graphNavigationManager en AppModeManager");
+                Debug.LogWarning("   ?? No se encontr√≥ el campo graphNavigationManager en AppModeManager");
             }
         }
         else
@@ -169,7 +169,7 @@ public class SetupGraphNavigation : EditorWindow
         {
             Debug.Log("   ? NavigationArrowController encontrado");
             
-            // Intentar encontrar un TextMeshProUGUI para progressText si no est· asignado
+            // Intentar encontrar un TextMeshProUGUI para progressText si no est√° asignado
             SerializedObject arrowSO = new SerializedObject(arrowController);
             SerializedProperty progressTextProp = arrowSO.FindProperty("progressText");
             
@@ -195,17 +195,17 @@ public class SetupGraphNavigation : EditorWindow
                 {
                     progressTextProp.objectReferenceValue = progressText;
                     arrowSO.ApplyModifiedProperties();
-                    Debug.Log($"   ? progressText asignado autom·ticamente: {progressText.gameObject.name}");
+                    Debug.Log($"   ? progressText asignado autom√°ticamente: {progressText.gameObject.name}");
                 }
                 else
                 {
-                    Debug.LogWarning("   ?? No se encontrÛ un TextMeshProUGUI apropiado para progressText");
-                    Debug.LogWarning("   ?? AsÌgnalo manualmente si lo necesitas");
+                    Debug.LogWarning("   ?? No se encontr√≥ un TextMeshProUGUI apropiado para progressText");
+                    Debug.LogWarning("   ?? As√≠gnalo manualmente si lo necesitas");
                 }
             }
             else if (progressTextProp != null && progressTextProp.objectReferenceValue != null)
             {
-                Debug.Log("   ? progressText ya est· asignado");
+                Debug.Log("   ? progressText ya est√° asignado");
             }
         }
         else
@@ -267,7 +267,7 @@ public class SetupGraphNavigation : EditorWindow
         
         // PASO 7: Resumen final
         Debug.Log("\n???????????????????????????????????????????????????????");
-        Debug.Log("? CONFIGURACI”N COMPLETADA");
+        Debug.Log("? CONFIGURACI√ìN COMPLETADA");
         Debug.Log("???????????????????????????????????????????????????????");
         Debug.Log("\n?? RESUMEN:");
         Debug.Log($"   ? GraphNavigationManager: {(graphNavManager != null ? "Configurado" : "No configurado")}");
@@ -275,7 +275,7 @@ public class SetupGraphNavigation : EditorWindow
         Debug.Log($"   ? NavigationArrowController: {(arrowController != null ? "Configurado" : "No encontrado")}");
         Debug.Log($"   ? FirebaseManager: {(firebaseManager != null ? "Configurado" : "No encontrado")}");
         
-        Debug.Log("\n?? PR”XIMOS PASOS:");
+        Debug.Log("\n?? PR√ìXIMOS PASOS:");
         Debug.Log("   1. Configura Firestore (ver: INSTRUCCIONES_FIRESTORE_GRAFO.md)");
         Debug.Log("   2. Agrega campo 'type' a buildingLocations");
         Debug.Log("   3. Crea collection 'graphEdges'");
@@ -284,11 +284,11 @@ public class SetupGraphNavigation : EditorWindow
         Debug.Log("\n???????????????????????????????????????????????????????\n");
         
         EditorUtility.DisplayDialog(
-            "ConfiguraciÛn Completada ?",
-            "El sistema de navegaciÛn por grafo ha sido configurado exitosamente.\n\n" +
+            "Configuraci√≥n Completada ?",
+            "El sistema de navegaci√≥n por grafo ha sido configurado exitosamente.\n\n" +
             "Revisa la consola para ver el resumen completo.\n\n" +
-            "PrÛximo paso:\n" +
-            "Configura Firestore seg˙n INSTRUCCIONES_FIRESTORE_GRAFO.md",
+            "Pr√≥ximo paso:\n" +
+            "Configura Firestore seg√∫n INSTRUCCIONES_FIRESTORE_GRAFO.md",
             "Entendido"
         );
         
@@ -299,7 +299,7 @@ public class SetupGraphNavigation : EditorWindow
     private static void VerifyCurrentSetup()
     {
         Debug.Log("???????????????????????????????????????????????????????");
-        Debug.Log("?? VERIFICANDO CONFIGURACI”N ACTUAL");
+        Debug.Log("?? VERIFICANDO CONFIGURACI√ìN ACTUAL");
         Debug.Log("???????????????????????????????????????????????????????\n");
         
         bool allGood = true;
@@ -310,8 +310,8 @@ public class SetupGraphNavigation : EditorWindow
         if (graphNavManager != null)
         {
             Debug.Log("? GraphNavigationManager encontrado");
-            Debug.Log($"   ï Node Reached Distance: {graphNavManager.nodeReachedDistance}m");
-            Debug.Log($"   ï Update Interval: {graphNavManager.updateInterval}s");
+            Debug.Log($"   ¬ï Node Reached Distance: {graphNavManager.nodeReachedDistance}m");
+            Debug.Log($"   ¬ï Update Interval: {graphNavManager.updateInterval}s");
         }
         else
         {
@@ -331,11 +331,11 @@ public class SetupGraphNavigation : EditorWindow
             
             if (graphNavProp != null && graphNavProp.objectReferenceValue != null)
             {
-                Debug.Log("   ? graphNavigationManager est· asignado");
+                Debug.Log("   ? graphNavigationManager est√° asignado");
             }
             else
             {
-                Debug.LogWarning("   ?? graphNavigationManager NO est· asignado");
+                Debug.LogWarning("   ?? graphNavigationManager NO est√° asignado");
                 allGood = false;
             }
         }
@@ -357,11 +357,11 @@ public class SetupGraphNavigation : EditorWindow
             
             if (progressTextProp != null && progressTextProp.objectReferenceValue != null)
             {
-                Debug.Log("   ? progressText est· asignado");
+                Debug.Log("   ? progressText est√° asignado");
             }
             else
             {
-                Debug.LogWarning("   ?? progressText NO est· asignado (opcional)");
+                Debug.LogWarning("   ?? progressText NO est√° asignado (opcional)");
             }
         }
         else
@@ -386,7 +386,7 @@ public class SetupGraphNavigation : EditorWindow
             }
             else
             {
-                Debug.LogWarning("   ?? graphEdgesCollectionName NO est· configurado");
+                Debug.LogWarning("   ?? graphEdgesCollectionName NO est√° configurado");
                 allGood = false;
             }
         }
@@ -400,12 +400,12 @@ public class SetupGraphNavigation : EditorWindow
         
         if (allGood)
         {
-            Debug.Log("? VERIFICACI”N EXITOSA - Todo est· configurado correctamente");
+            Debug.Log("? VERIFICACI√ìN EXITOSA - Todo est√° configurado correctamente");
             
             EditorUtility.DisplayDialog(
-                "VerificaciÛn Exitosa ?",
-                "Todos los componentes est·n configurados correctamente.\n\n" +
-                "El sistema est· listo para usarse.\n\n" +
+                "Verificaci√≥n Exitosa ?",
+                "Todos los componentes est√°n configurados correctamente.\n\n" +
+                "El sistema est√° listo para usarse.\n\n" +
                 "Siguiente paso:\n" +
                 "Configurar Firestore y hacer Build and Run",
                 "Excelente"
@@ -413,13 +413,13 @@ public class SetupGraphNavigation : EditorWindow
         }
         else
         {
-            Debug.LogWarning("?? VERIFICACI”N INCOMPLETA - Hay componentes faltantes o mal configurados");
+            Debug.LogWarning("?? VERIFICACI√ìN INCOMPLETA - Hay componentes faltantes o mal configurados");
             
             EditorUtility.DisplayDialog(
-                "VerificaciÛn Incompleta ??",
-                "Algunos componentes no est·n configurados correctamente.\n\n" +
+                "Verificaci√≥n Incompleta ??",
+                "Algunos componentes no est√°n configurados correctamente.\n\n" +
                 "Revisa la consola para ver los detalles.\n\n" +
-                "Ejecuta 'Configurar Autom·ticamente' para corregir.",
+                "Ejecuta 'Configurar Autom√°ticamente' para corregir.",
                 "Entendido"
             );
         }

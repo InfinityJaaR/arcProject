@@ -5,7 +5,7 @@ using UnityEditor;
 #endif
 
 /// <summary>
-/// Script de utilidad para configurar r·pidamente el sistema de navegaciÛn
+/// Script de utilidad para configurar r√°pidamente el sistema de navegaci√≥n
 /// Solo disponible en el Editor de Unity
 /// </summary>
 public class NavigationSetupHelper : MonoBehaviour
@@ -15,7 +15,7 @@ public class NavigationSetupHelper : MonoBehaviour
     [MenuItem("AR Tools/Navigation/Quick Setup")]
     public static void QuickSetup()
     {
-        Debug.Log("[NavigationSetup] ?? Iniciando configuraciÛn r·pida...");
+        Debug.Log("[NavigationSetup] ?? Iniciando configuraci√≥n r√°pida...");
         
         // 1. Crear LocationManager si no existe
         LocationManager locationMgr = FindAnyObjectByType<LocationManager>();
@@ -50,7 +50,7 @@ public class NavigationSetupHelper : MonoBehaviour
                 Debug.Log("[NavigationSetup] ? Prefab de flecha asignado");
             }
             
-            // Asignar c·mara
+            // Asignar c√°mara
             navController.arCamera = Camera.main;
             
             Debug.Log("[NavigationSetup] ? NavigationController creado");
@@ -66,8 +66,8 @@ public class NavigationSetupHelper : MonoBehaviour
             Debug.Log("[NavigationSetup] ? Referencias conectadas en AppModeManager");
         }
         
-        Debug.Log("[NavigationSetup] ? ConfiguraciÛn b·sica completada!");
-        Debug.Log("[NavigationSetup] ?? TodavÌa necesitas crear la UI manualmente (ver NAVEGACION_AR_SETUP.md)");
+        Debug.Log("[NavigationSetup] ? Configuraci√≥n b√°sica completada!");
+        Debug.Log("[NavigationSetup] ?? Todav√≠a necesitas crear la UI manualmente (ver NAVEGACION_AR_SETUP.md)");
     }
     
     [MenuItem("AR Tools/Navigation/Create Debug Panel")]
@@ -105,7 +105,7 @@ public class NavigationSetupHelper : MonoBehaviour
     [MenuItem("AR Tools/Navigation/Verify Setup")]
     public static void VerifySetup()
     {
-        Debug.Log("[NavigationSetup] ?? Verificando configuraciÛn...");
+        Debug.Log("[NavigationSetup] ?? Verificando configuraci√≥n...");
         Debug.Log("????????????????????????????????????????");
         
         // Verificar componentes principales
@@ -125,9 +125,9 @@ public class NavigationSetupHelper : MonoBehaviour
         GameObject arrowPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Flecha-Prefab.prefab");
         Debug.Log($"Prefab de Flecha: {(arrowPrefab != null ? "?" : "?")}");
         
-        // Verificar prefab de botÛn
+        // Verificar prefab de bot√≥n
         GameObject buttonPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/LocationButton.prefab");
-        Debug.Log($"Prefab de BotÛn: {(buttonPrefab != null ? "?" : "?")}");
+        Debug.Log($"Prefab de Bot√≥n: {(buttonPrefab != null ? "?" : "?")}");
         
         Debug.Log("????????????????????????????????????????");
         
@@ -164,15 +164,15 @@ public class NavigationSetupHelper : MonoBehaviour
     [MenuItem("AR Tools/Navigation/Open Setup Guide")]
     public static void OpenSetupGuide()
     {
-        string path = "Assets/NAVEGACION_AR_SETUP.md";
+        string path = "Assets/docs/NAVEGACION_AR_SETUP.md";
         if (System.IO.File.Exists(path))
         {
             UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(path, 1);
-            Debug.Log("[NavigationSetup] ?? Abriendo guÌa de configuraciÛn...");
+            Debug.Log("[NavigationSetup] ?? Abriendo gu√≠a de configuraci√≥n...");
         }
         else
         {
-            Debug.LogWarning("[NavigationSetup] ?? No se encontrÛ NAVEGACION_AR_SETUP.md");
+            Debug.LogWarning("[NavigationSetup] ?? No se encontr√≥ NAVEGACION_AR_SETUP.md");
         }
     }
     

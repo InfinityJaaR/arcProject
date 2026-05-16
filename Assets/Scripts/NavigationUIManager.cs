@@ -259,15 +259,27 @@ public class NavigationUIManager : MonoBehaviour
         
         if (availableBuildings.Count == 0)
         {
-            Debug.LogWarning("[NavigationUIManager] ⚠️ No se encontraron edificios navegables (type='edificio')");
+            Debug.LogWarning("[NavigationUIManager] No se encontraron edificios navegables (type='edificio')");
             
-            // Mostrar mensaje al usuario
             if (loadingText != null)
             {
                 loadingText.gameObject.SetActive(true);
-                loadingText.text = "No hay edificios disponibles para navegación";
+                string hint = FirebaseManager.Instance != null && FirebaseManager.Instance.IsUsingLocalSnapshot
+                    ? "Sin edificios en datos guardados. Conéctate para actualizar."
+                    : "No hay edificios. Verifica Firebase o el campo type=edificio.";
+                loadingText.text = hint;
             }
             return;
+        }
+
+        if (FirebaseManager.Instance != null && FirebaseManager.Instance.IsUsingLocalSnapshot && loadingText != null)
+        {
+            var t = LocalDataStore.GetLastSyncTime();
+            loadingText.gameObject.SetActive(true);
+            loadingText.text = t.HasValue
+                ? $"Datos sin conexión ({t.Value.ToLocalTime():g})"
+                : "Datos sin conexión";
+            loadingText.gameObject.SetActive(false);
         }
         
         Debug.Log($"[NavigationUIManager] ✅ Se cargaron {availableBuildings.Count} edificios navegables");
@@ -399,7 +411,7 @@ public class NavigationUIManager : MonoBehaviour
     /// <summary>
     /// Callback cuando se hace click en "Abrir Panel de Lugares"
     /// </summary>
-    private void OnOpenLocationPanelClicked()
+    public void OnOpenLocationPanelClicked()
     {
         Debug.Log("[NavigationUIManager] ?? ============================================");
         Debug.Log("[NavigationUIManager] ?? BOTÓN 'NAVEGAR' PRESIONADO!");

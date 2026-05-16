@@ -3,16 +3,16 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 
 /// <summary>
-/// Herramienta de Editor para aÒadir y configurar PermissionsManager autom·ticamente
-/// Men˙: AR Tools > Add Permissions Manager
+/// Herramienta de Editor para a√±adir y configurar PermissionsManager autom√°ticamente
+/// Men√∫: AR Tools > Add Permissions Manager
 /// </summary>
 public class PermissionsManagerSetup : EditorWindow
 {
-    [MenuItem("AR Tools/Permissions/?? AÒadir Permissions Manager", false, 100)]
+    [MenuItem("AR Tools/Permissions/?? A√±adir Permissions Manager", false, 100)]
     static void AddPermissionsManager()
     {
         Debug.Log("???????????????????????????????????????????????");
-        Debug.Log("?? A—ADIENDO PERMISSIONS MANAGER");
+        Debug.Log("?? A√ëADIENDO PERMISSIONS MANAGER");
         Debug.Log("???????????????????????????????????????????????");
         
         // Verificar si ya existe
@@ -24,8 +24,8 @@ public class PermissionsManagerSetup : EditorWindow
             
             bool overwrite = EditorUtility.DisplayDialog(
                 "PermissionsManager ya existe",
-                "Ya hay un PermissionsManager en la escena.\n\nøQuieres seleccionarlo para verificar su configuraciÛn?",
-                "SÌ, seleccionar",
+                "Ya hay un PermissionsManager en la escena.\n\n¬øQuieres seleccionarlo para verificar su configuraci√≥n?",
+                "S√≠, seleccionar",
                 "Cancelar"
             );
             
@@ -41,7 +41,7 @@ public class PermissionsManagerSetup : EditorWindow
         // Crear GameObject
         GameObject permissionsManagerObj = new GameObject("PermissionsManager");
         
-        // AÒadir componente
+        // A√±adir componente
         PermissionsManager pm = permissionsManagerObj.AddComponent<PermissionsManager>();
         
         // Configurar valores por defecto
@@ -50,8 +50,8 @@ public class PermissionsManagerSetup : EditorWindow
         serializedPM.FindProperty("showRationale").boolValue = true;
         serializedPM.ApplyModifiedProperties();
         
-        Debug.Log("? PermissionsManager aÒadido a la escena");
-        Debug.Log("?? ConfiguraciÛn:");
+        Debug.Log("? PermissionsManager a√±adido a la escena");
+        Debug.Log("?? Configuraci√≥n:");
         Debug.Log("   ? Request On Start: TRUE");
         Debug.Log("   ? Show Rationale: TRUE");
         
@@ -68,24 +68,24 @@ public class PermissionsManagerSetup : EditorWindow
         Debug.Log("\n???????????????????????????????????????????????");
         Debug.Log("? PERMISSIONS MANAGER CONFIGURADO");
         Debug.Log("???????????????????????????????????????????????");
-        Debug.Log("?? PR”XIMOS PASOS:");
-        Debug.Log("   1. Verifica la configuraciÛn en el Inspector");
+        Debug.Log("?? PR√ìXIMOS PASOS:");
+        Debug.Log("   1. Verifica la configuraci√≥n en el Inspector");
         Debug.Log("   2. Build & Run en Android");
-        Debug.Log("   3. La app pedir· permisos de UBICACI”N + C¡MARA");
+        Debug.Log("   3. La app pedir√° permisos de UBICACI√ìN + C√ÅMARA");
         Debug.Log("   4. Concede los permisos");
-        Debug.Log("   5. GPS inicializar· autom·ticamente");
+        Debug.Log("   5. GPS inicializar√° autom√°ticamente");
         
-        // Mostrar di·logo de confirmaciÛn
+        // Mostrar di√°logo de confirmaci√≥n
         EditorUtility.DisplayDialog(
-            "PermissionsManager AÒadido",
-            "? PermissionsManager ha sido aÒadido y configurado.\n\n" +
+            "PermissionsManager A√±adido",
+            "? PermissionsManager ha sido a√±adido y configurado.\n\n" +
             "Script Execution Order configurado:\n" +
-            "  ï PermissionsManager: -100\n" +
-            "  ï LocationManager: 0\n\n" +
-            "PrÛximos pasos:\n" +
+            "  ¬ï PermissionsManager: -100\n" +
+            "  ¬ï LocationManager: 0\n\n" +
+            "Pr√≥ximos pasos:\n" +
             "  1. Build & Run en Android\n" +
             "  2. Concede permisos cuando la app los pida\n" +
-            "  3. GPS inicializar· autom·ticamente",
+            "  3. GPS inicializar√° autom√°ticamente",
             "Entendido"
         );
     }
@@ -101,23 +101,23 @@ public class PermissionsManagerSetup : EditorWindow
         
         if (permissionsManagerScript == null)
         {
-            Debug.LogError("? No se encontrÛ el script PermissionsManager.cs");
+            Debug.LogError("? No se encontr√≥ el script PermissionsManager.cs");
             return;
         }
         
         if (locationManagerScript == null)
         {
-            Debug.LogError("? No se encontrÛ el script LocationManager.cs");
+            Debug.LogError("? No se encontr√≥ el script LocationManager.cs");
             return;
         }
         
-        // Configurar orden de ejecuciÛn
+        // Configurar orden de ejecuci√≥n
         MonoImporter.SetExecutionOrder(permissionsManagerScript, -100);
         MonoImporter.SetExecutionOrder(locationManagerScript, 0);
         
         Debug.Log("? Script Execution Order configurado:");
-        Debug.Log("   ï PermissionsManager: -100 (se ejecuta primero)");
-        Debug.Log("   ï LocationManager: 0 (se ejecuta despuÈs)");
+        Debug.Log("   ¬ï PermissionsManager: -100 (se ejecuta primero)");
+        Debug.Log("   ¬ï LocationManager: 0 (se ejecuta despu√©s)");
         
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
@@ -138,10 +138,10 @@ public class PermissionsManagerSetup : EditorWindow
             
             bool create = EditorUtility.DisplayDialog(
                 "AndroidManifest.xml no encontrado",
-                "No se encontrÛ AndroidManifest.xml en:\n" +
+                "No se encontr√≥ AndroidManifest.xml en:\n" +
                 "Assets/Plugins/Android/\n\n" +
-                "øQuieres crear uno con los permisos necesarios?",
-                "SÌ, crear",
+                "¬øQuieres crear uno con los permisos necesarios?",
+                "S√≠, crear",
                 "Cancelar"
             );
             
@@ -167,13 +167,13 @@ public class PermissionsManagerSetup : EditorWindow
         
         if (!hasFineLocation || !hasCoarseLocation)
         {
-            Debug.LogWarning("?? Faltan permisos de ubicaciÛn en AndroidManifest.xml");
+            Debug.LogWarning("?? Faltan permisos de ubicaci√≥n en AndroidManifest.xml");
             
             bool add = EditorUtility.DisplayDialog(
                 "Permisos Faltantes",
-                "AndroidManifest.xml no tiene los permisos de ubicaciÛn necesarios.\n\n" +
-                "øQuieres que los aÒada autom·ticamente?",
-                "SÌ, aÒadir",
+                "AndroidManifest.xml no tiene los permisos de ubicaci√≥n necesarios.\n\n" +
+                "¬øQuieres que los a√±ada autom√°ticamente?",
+                "S√≠, a√±adir",
                 "No"
             );
             
@@ -184,36 +184,36 @@ public class PermissionsManagerSetup : EditorWindow
         }
         else
         {
-            Debug.Log("? Todos los permisos est·n en AndroidManifest.xml");
+            Debug.Log("? Todos los permisos est√°n en AndroidManifest.xml");
             
             EditorUtility.DisplayDialog(
                 "Permisos Verificados",
                 "? AndroidManifest.xml tiene todos los permisos necesarios:\n\n" +
-                "  ï ACCESS_FINE_LOCATION\n" +
-                "  ï ACCESS_COARSE_LOCATION\n" +
-                "  ï CAMERA",
+                "  ¬ï ACCESS_FINE_LOCATION\n" +
+                "  ¬ï ACCESS_COARSE_LOCATION\n" +
+                "  ¬ï CAMERA",
                 "Perfecto"
             );
         }
     }
     
-    [MenuItem("AR Tools/Permissions/?? Abrir GuÌa de Permisos", false, 103)]
+    [MenuItem("AR Tools/Permissions/?? Abrir Gu√≠a de Permisos", false, 103)]
     static void OpenPermissionsGuide()
     {
-        string guidePath = "Assets/SOLUCION_PERMISOS_UBICACION.md";
+        string guidePath = "Assets/docs/SOLUCION_PERMISOS_UBICACION.md";
         
         if (System.IO.File.Exists(guidePath))
         {
             UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(guidePath, 1);
-            Debug.Log("?? Abriendo guÌa de permisos...");
+            Debug.Log("?? Abriendo gu√≠a de permisos...");
         }
         else
         {
-            Debug.LogError("? No se encontrÛ SOLUCION_PERMISOS_UBICACION.md");
+            Debug.LogError("? No se encontr√≥ SOLUCION_PERMISOS_UBICACION.md");
         }
     }
     
-    // MÈtodo auxiliar para obtener MonoScript
+    // M√©todo auxiliar para obtener MonoScript
     static MonoScript GetMonoScript(string className)
     {
         string[] guids = AssetDatabase.FindAssets($"t:MonoScript {className}");
@@ -249,14 +249,14 @@ public class PermissionsManagerSetup : EditorWindow
         string manifestContent = @"<?xml version=""1.0"" encoding=""utf-8""?>
 <manifest xmlns:android=""http://schemas.android.com/apk/res/android"">
     
-    <!-- Permisos de ubicaciÛn para navegaciÛn AR -->
+    <!-- Permisos de ubicaci√≥n para navegaci√≥n AR -->
     <uses-permission android:name=""android.permission.ACCESS_FINE_LOCATION"" />
     <uses-permission android:name=""android.permission.ACCESS_COARSE_LOCATION"" />
     
-    <!-- Permiso de c·mara para AR -->
+    <!-- Permiso de c√°mara para AR -->
     <uses-permission android:name=""android.permission.CAMERA"" />
     
-    <!-- CaracterÌsticas del dispositivo -->
+    <!-- Caracter√≠sticas del dispositivo -->
     <uses-feature android:name=""android.hardware.location.gps"" android:required=""false"" />
     <uses-feature android:name=""android.hardware.camera.ar"" android:required=""true"" />
     
@@ -266,34 +266,34 @@ public class PermissionsManagerSetup : EditorWindow
         System.IO.File.WriteAllText(path, manifestContent);
         
         Debug.Log($"? AndroidManifest.xml creado en: {path}");
-        Debug.Log("?? Permisos aÒadidos:");
-        Debug.Log("   ï ACCESS_FINE_LOCATION");
-        Debug.Log("   ï ACCESS_COARSE_LOCATION");
-        Debug.Log("   ï CAMERA");
+        Debug.Log("?? Permisos a√±adidos:");
+        Debug.Log("   ¬ï ACCESS_FINE_LOCATION");
+        Debug.Log("   ¬ï ACCESS_COARSE_LOCATION");
+        Debug.Log("   ¬ï CAMERA");
         
         AssetDatabase.Refresh();
         
         EditorUtility.DisplayDialog(
             "AndroidManifest Creado",
             "? AndroidManifest.xml ha sido creado con todos los permisos necesarios.\n\n" +
-            "UbicaciÛn:\n" +
+            "Ubicaci√≥n:\n" +
             "Assets/Plugins/Android/AndroidManifest.xml\n\n" +
-            "PrÛximo paso:\n" +
+            "Pr√≥ximo paso:\n" +
             "Build & Run para probar los permisos",
             "Entendido"
         );
     }
     
-    // AÒadir permisos a manifest existente
+    // A√±adir permisos a manifest existente
     static void AddPermissionsToManifest(string path, string content)
     {
-        // Buscar dÛnde insertar los permisos
-        string permissionsToAdd = @"    <!-- Permisos de ubicaciÛn para navegaciÛn AR -->
+        // Buscar d√≥nde insertar los permisos
+        string permissionsToAdd = @"    <!-- Permisos de ubicaci√≥n para navegaci√≥n AR -->
     <uses-permission android:name=""android.permission.ACCESS_FINE_LOCATION"" />
     <uses-permission android:name=""android.permission.ACCESS_COARSE_LOCATION"" />
     ";
         
-        // Insertar despuÈs de <manifest>
+        // Insertar despu√©s de <manifest>
         int insertIndex = content.IndexOf("<manifest");
         if (insertIndex != -1)
         {
@@ -303,16 +303,16 @@ public class PermissionsManagerSetup : EditorWindow
             // Guardar
             System.IO.File.WriteAllText(path, content);
             
-            Debug.Log("? Permisos aÒadidos a AndroidManifest.xml");
+            Debug.Log("? Permisos a√±adidos a AndroidManifest.xml");
             
             AssetDatabase.Refresh();
             
             EditorUtility.DisplayDialog(
-                "Permisos AÒadidos",
-                "? Los permisos de ubicaciÛn han sido aÒadidos a AndroidManifest.xml\n\n" +
-                "Permisos aÒadidos:\n" +
-                "  ï ACCESS_FINE_LOCATION\n" +
-                "  ï ACCESS_COARSE_LOCATION",
+                "Permisos A√±adidos",
+                "? Los permisos de ubicaci√≥n han sido a√±adidos a AndroidManifest.xml\n\n" +
+                "Permisos a√±adidos:\n" +
+                "  ¬ï ACCESS_FINE_LOCATION\n" +
+                "  ¬ï ACCESS_COARSE_LOCATION",
                 "Perfecto"
             );
         }

@@ -5,7 +5,7 @@ using TMPro;
 
 /// <summary>
 /// Herramienta de Editor para configurar el sistema de mapa expandible
-/// VersiÛn 1.0
+/// Versi√≥n 1.0
 /// </summary>
 public class SetupExpandableMap : EditorWindow
 {
@@ -24,7 +24,7 @@ public class SetupExpandableMap : EditorWindow
         scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
         
         GUILayout.Space(10);
-        EditorGUILayout.LabelField("??? CONFIGURACI”N DE MAPA EXPANDIBLE", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("??? CONFIGURACI√ìN DE MAPA EXPANDIBLE", EditorStyles.boldLabel);
         GUILayout.Space(10);
         
         EditorGUILayout.HelpBox(
@@ -34,14 +34,14 @@ public class SetupExpandableMap : EditorWindow
         
         GUILayout.Space(20);
         
-        // BotÛn de configuraciÛn autom·tica
-        if (GUILayout.Button("?? Configurar Mapa Expandible Autom·ticamente", GUILayout.Height(40)))
+        // Bot√≥n de configuraci√≥n autom√°tica
+        if (GUILayout.Button("?? Configurar Mapa Expandible Autom√°ticamente", GUILayout.Height(40)))
         {
             if (EditorUtility.DisplayDialog(
-                "Confirmar ConfiguraciÛn",
-                "øCrear el sistema de mapa expandible autom·ticamente?\n\n" +
-                "Esto modificar· el MiniMapCanvas existente.",
-                "SÌ, configurar",
+                "Confirmar Configuraci√≥n",
+                "¬øCrear el sistema de mapa expandible autom√°ticamente?\n\n" +
+                "Esto modificar√° el MiniMapCanvas existente.",
+                "S√≠, configurar",
                 "Cancelar"))
             {
                 SetupExpandableMapSystem();
@@ -51,40 +51,40 @@ public class SetupExpandableMap : EditorWindow
         GUILayout.Space(20);
         
         EditorGUILayout.HelpBox(
-            "CARACTERÕSTICAS:\n" +
+            "CARACTER√çSTICAS:\n" +
             "? Minimapa compacto en esquina\n" +
-            "? BotÛn para expandir a pantalla completa\n" +
+            "? Bot√≥n para expandir a pantalla completa\n" +
             "? Zoom interactivo (slider + pinch)\n" +
             "? Pan/arrastre con el dedo\n" +
-            "? BotÛn para centrar en tu ubicaciÛn\n" +
+            "? Bot√≥n para centrar en tu ubicaci√≥n\n" +
             "? Animaciones suaves\n" +
-            "? Interfaz t·ctil optimizada",
+            "? Interfaz t√°ctil optimizada",
             MessageType.None
         );
         
         GUILayout.Space(20);
         
-        // BotÛn de verificaciÛn
-        if (GUILayout.Button("?? Verificar ConfiguraciÛn Actual", GUILayout.Height(30)))
+        // Bot√≥n de verificaci√≥n
+        if (GUILayout.Button("?? Verificar Configuraci√≥n Actual", GUILayout.Height(30)))
         {
             VerifySetup();
         }
         
         GUILayout.Space(10);
         
-        // BotÛn de documentaciÛn
-        if (GUILayout.Button("?? Ver DocumentaciÛn", GUILayout.Height(30)))
+        // Bot√≥n de documentaci√≥n
+        if (GUILayout.Button("?? Ver Documentaci√≥n", GUILayout.Height(30)))
         {
-            // Abrir archivo de documentaciÛn si existe
-            string docPath = "Assets/GUIA_MAPA_EXPANDIBLE.md";
+            // Abrir archivo de documentaci√≥n si existe
+            string docPath = "Assets/docs/GUIA_MAPA_EXPANDIBLE.md";
             if (System.IO.File.Exists(docPath))
             {
                 System.Diagnostics.Process.Start(docPath);
             }
             else
             {
-                EditorUtility.DisplayDialog("DocumentaciÛn", 
-                    "La documentaciÛn se crear· autom·ticamente al configurar el sistema.", 
+                EditorUtility.DisplayDialog("Documentaci√≥n", 
+                    "La documentaci√≥n se crear√° autom√°ticamente al configurar el sistema.", 
                     "OK");
             }
         }
@@ -94,14 +94,14 @@ public class SetupExpandableMap : EditorWindow
     
     private static void SetupExpandableMapSystem()
     {
-        Debug.Log("[SetupExpandableMap] ?? Iniciando configuraciÛn del mapa expandible...");
+        Debug.Log("[SetupExpandableMap] ?? Iniciando configuraci√≥n del mapa expandible...");
         
         // 1. Buscar MiniMapCanvas existente
         GameObject miniMapCanvas = GameObject.Find("MiniMapCanvas");
         if (miniMapCanvas == null)
         {
             EditorUtility.DisplayDialog("Error", 
-                "No se encontrÛ MiniMapCanvas.\n\n" +
+                "No se encontr√≥ MiniMapCanvas.\n\n" +
                 "Por favor, ejecuta primero:\n" +
                 "AR Navigation ? Setup MiniMap System", 
                 "OK");
@@ -154,7 +154,7 @@ public class SetupExpandableMap : EditorWindow
         // 6. Crear controles del mapa expandido
         CreateExpandedControls(expandedPanel, expandableController);
         
-        // 7. Crear botÛn de expandir en el minimapa
+        // 7. Crear bot√≥n de expandir en el minimapa
         CreateExpandButton(compactPanel, expandableController);
         
         // 8. Asignar paneles al controller
@@ -173,20 +173,20 @@ public class SetupExpandableMap : EditorWindow
         // 10. Guardar
         EditorUtility.SetDirty(miniMapCanvas);
         
-        Debug.Log("[SetupExpandableMap] ? °Sistema de mapa expandible configurado!");
+        Debug.Log("[SetupExpandableMap] ? ¬°Sistema de mapa expandible configurado!");
         
         EditorUtility.DisplayDialog(
-            "°ConfiguraciÛn Completa! ??",
-            "El sistema de mapa expandible est· listo.\n\n" +
-            "C”MO USAR:\n" +
-            "ï BotÛn ?? en el minimapa ? Expandir\n" +
-            "ï En vista expandida:\n" +
+            "¬°Configuraci√≥n Completa! ??",
+            "El sistema de mapa expandible est√° listo.\n\n" +
+            "C√ìMO USAR:\n" +
+            "¬ï Bot√≥n ?? en el minimapa ? Expandir\n" +
+            "¬ï En vista expandida:\n" +
             "  - Desliza para mover el mapa\n" +
             "  - Usa el slider para zoom\n" +
-            "  - BotÛn ?? para centrar\n" +
-            "  - BotÛn ? para cerrar\n\n" +
-            "°Ejecuta la app y pruÈbalo!",
-            "°Excelente!"
+            "  - Bot√≥n ?? para centrar\n" +
+            "  - Bot√≥n ? para cerrar\n\n" +
+            "¬°Ejecuta la app y pru√©balo!",
+            "¬°Excelente!"
         );
     }
     
@@ -208,7 +208,7 @@ public class SetupExpandableMap : EditorWindow
             return mapPanel.gameObject;
         }
         
-        Debug.LogError("[SetupExpandableMap] ? No se encontrÛ MapPanel");
+        Debug.LogError("[SetupExpandableMap] ? No se encontr√≥ MapPanel");
         return null;
     }
     
@@ -248,7 +248,7 @@ public class SetupExpandableMap : EditorWindow
     
     private static void CreateExpandedControls(GameObject parent, ExpandableMapController controller)
     {
-        // Header con tÌtulo y botÛn cerrar
+        // Header con t√≠tulo y bot√≥n cerrar
         CreateHeader(parent, controller);
         
         // Footer con controles (zoom, centrar)
@@ -261,7 +261,7 @@ public class SetupExpandableMap : EditorWindow
         RectTransform headerRect = header.AddComponent<RectTransform>();
         headerRect.SetParent(parent.transform, false);
         
-        // PosiciÛn en la parte superior
+        // Posici√≥n en la parte superior
         headerRect.anchorMin = new Vector2(0, 1);
         headerRect.anchorMax = new Vector2(1, 1);
         headerRect.pivot = new Vector2(0.5f, 1);
@@ -272,7 +272,7 @@ public class SetupExpandableMap : EditorWindow
         Image headerBg = header.AddComponent<Image>();
         headerBg.color = new Color(0.1f, 0.1f, 0.1f, 1f);
         
-        // BotÛn cerrar (X)
+        // Bot√≥n cerrar (X)
         GameObject closeBtn = new GameObject("CloseButton");
         RectTransform closeBtnRect = closeBtn.AddComponent<RectTransform>();
         closeBtnRect.SetParent(header.transform, false);
@@ -288,7 +288,7 @@ public class SetupExpandableMap : EditorWindow
         Button closeBtnButton = closeBtn.AddComponent<Button>();
         controller.closeButton = closeBtnButton;
         
-        // Texto del botÛn cerrar
+        // Texto del bot√≥n cerrar
         GameObject closeBtnText = new GameObject("Text");
         TextMeshProUGUI closeText = closeBtnText.AddComponent<TextMeshProUGUI>();
         closeText.text = "?";
@@ -303,7 +303,7 @@ public class SetupExpandableMap : EditorWindow
         closeTextRect.offsetMin = Vector2.zero;
         closeTextRect.offsetMax = Vector2.zero;
         
-        // TÌtulo
+        // T√≠tulo
         GameObject titleObj = new GameObject("Title");
         TextMeshProUGUI title = titleObj.AddComponent<TextMeshProUGUI>();
         title.text = "??? MAPA DEL CAMPUS";
@@ -328,7 +328,7 @@ public class SetupExpandableMap : EditorWindow
         RectTransform footerRect = footer.AddComponent<RectTransform>();
         footerRect.SetParent(parent.transform, false);
         
-        // PosiciÛn en la parte inferior
+        // Posici√≥n en la parte inferior
         footerRect.anchorMin = new Vector2(0, 0);
         footerRect.anchorMax = new Vector2(1, 0);
         footerRect.pivot = new Vector2(0.5f, 0);
@@ -339,7 +339,7 @@ public class SetupExpandableMap : EditorWindow
         Image footerBg = footer.AddComponent<Image>();
         footerBg.color = new Color(0.1f, 0.1f, 0.1f, 1f);
         
-        // BotÛn centrar
+        // Bot√≥n centrar
         GameObject centerBtn = CreateFooterButton(footer.transform, "?? Centrar", new Vector2(20, 0), new Vector2(0, 0.5f));
         controller.centerButton = centerBtn.GetComponent<Button>();
         
@@ -365,7 +365,7 @@ public class SetupExpandableMap : EditorWindow
         
         btn.AddComponent<Button>();
         
-        // Texto del botÛn
+        // Texto del bot√≥n
         GameObject btnText = new GameObject("Text");
         TextMeshProUGUI tmpText = btnText.AddComponent<TextMeshProUGUI>();
         tmpText.text = text;
@@ -486,7 +486,7 @@ public class SetupExpandableMap : EditorWindow
         RectTransform btnRect = expandBtn.AddComponent<RectTransform>();
         btnRect.SetParent(compactPanel.transform, false);
         
-        // PosiciÛn en la esquina inferior derecha del minimapa
+        // Posici√≥n en la esquina inferior derecha del minimapa
         btnRect.anchorMin = new Vector2(1, 0);
         btnRect.anchorMax = new Vector2(1, 0);
         btnRect.pivot = new Vector2(1, 0);
@@ -499,7 +499,7 @@ public class SetupExpandableMap : EditorWindow
         Button button = expandBtn.AddComponent<Button>();
         controller.expandButton = button;
         
-        // Texto del botÛn
+        // Texto del bot√≥n
         GameObject btnText = new GameObject("Text");
         TextMeshProUGUI tmpText = btnText.AddComponent<TextMeshProUGUI>();
         tmpText.text = "??";
@@ -514,13 +514,13 @@ public class SetupExpandableMap : EditorWindow
         textRect.offsetMin = Vector2.zero;
         textRect.offsetMax = Vector2.zero;
         
-        Debug.Log("[SetupExpandableMap] ? BotÛn expandir creado");
+        Debug.Log("[SetupExpandableMap] ? Bot√≥n expandir creado");
     }
     
     private static void VerifySetup()
     {
         bool allGood = true;
-        string report = "VERIFICACI”N DEL SISTEMA:\n\n";
+        string report = "VERIFICACI√ìN DEL SISTEMA:\n\n";
         
         // Verificar MiniMapCanvas
         GameObject miniMapCanvas = GameObject.Find("MiniMapCanvas");
@@ -569,7 +569,7 @@ public class SetupExpandableMap : EditorWindow
             else
             {
                 report += "? ExpandableMapController NO encontrado\n";
-                report += "\nEjecuta: 'Configurar Mapa Expandible Autom·ticamente'\n";
+                report += "\nEjecuta: 'Configurar Mapa Expandible Autom√°ticamente'\n";
                 allGood = false;
             }
         }
@@ -582,13 +582,13 @@ public class SetupExpandableMap : EditorWindow
         
         if (allGood)
         {
-            report += "\n?? °TODO CONFIGURADO CORRECTAMENTE!";
-            EditorUtility.DisplayDialog("VerificaciÛn Exitosa", report, "Genial!");
+            report += "\n?? ¬°TODO CONFIGURADO CORRECTAMENTE!";
+            EditorUtility.DisplayDialog("Verificaci√≥n Exitosa", report, "Genial!");
         }
         else
         {
-            report += "\n?? Hay problemas en la configuraciÛn.";
-            EditorUtility.DisplayDialog("VerificaciÛn Fallida", report, "Entendido");
+            report += "\n?? Hay problemas en la configuraci√≥n.";
+            EditorUtility.DisplayDialog("Verificaci√≥n Fallida", report, "Entendido");
         }
         
         Debug.Log("[SetupExpandableMap] " + report);

@@ -45,7 +45,7 @@ public class InfoPanelController : MonoBehaviour
     
     [Header("?? DEBUG: Forzar Opacidad")]
     [Tooltip("Fuerza alpha 1.0 en TODOS los componentes cada frame")]
-    public bool forceOpaqueEveryFrame = true;
+    public bool forceOpaqueEveryFrame = false;
     
     private CanvasGroup canvasGroup;
     private Camera mainCamera;

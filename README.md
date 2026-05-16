@@ -4,86 +4,86 @@ Este repositorio contiene un proyecto AR mobile desarrollado en Unity como un pr
 
 ---
 
-## ?? CORRECCIÓN RECIENTE (2025-01-07)
+## ?? CORRECCIÃ“N RECIENTE (2025-01-07)
 
-### **Errores de compilación corregidos:**
+### **Errores de compilaciÃ³n corregidos:**
 - ? Error `LocationInfo.course` eliminado
 - ? Error `LocationInfo.speed` eliminado
 
-Ver detalles: [RESUMEN_CORRECCION_ERRORES.md](./Assets/RESUMEN_CORRECCION_ERRORES.md)
+Ver detalles: [RESUMEN_CORRECCION_ERRORES.md](./Assets/docs/RESUMEN_CORRECCION_ERRORES.md)
 
-### **?? FIX: Flecha Apunta al Revés (180°)**
+### **?? FIX: Flecha Apunta al RevÃ©s (180Â°)**
 
 Si la flecha apunta al lado opuesto del destino:
 - ? Fix implementado con checkbox `invertArrowModel`
 - ?? Por defecto MARCADO (basado en reportes)
 - ?? Probar en dispositivo y ajustar si necesario
 
-Ver guía: [RESUMEN_FIX_FLECHA_INVERTIDA.md](./Assets/RESUMEN_FIX_FLECHA_INVERTIDA.md)
+Ver guÃ­a: [RESUMEN_FIX_FLECHA_INVERTIDA.md](./Assets/docs/RESUMEN_FIX_FLECHA_INVERTIDA.md)
 
 ---
 
-## ?? Sistema de Navegación AR
+## ?? Sistema de NavegaciÃ³n AR
 
-El proyecto incluye un sistema completo de navegación AR que utiliza GPS y brújula para guiar al usuario hacia destinos seleccionados.
+El proyecto incluye un sistema completo de navegaciÃ³n AR que utiliza GPS y brÃºjula para guiar al usuario hacia destinos seleccionados.
 
-### ? Características Principales
+### ? CaracterÃ­sticas Principales
 
-- ?? **GPS de Alta Precisión**: Tracking en tiempo real de la ubicación del usuario
-- ?? **Brújula Magnética**: Detección del Norte geográfico real
+- ?? **GPS de Alta PrecisiÃ³n**: Tracking en tiempo real de la ubicaciÃ³n del usuario
+- ?? **BrÃºjula MagnÃ©tica**: DetecciÃ³n del Norte geogrÃ¡fico real
 - ?? **Flecha AR Direccional**: Apunta visualmente hacia el destino
-- ?? **Interfaz de Navegación**: Muestra distancia y dirección
-- ?? **Sistema de Fallback**: Usa GPS bearing si la brújula no funciona
-- ??? **Herramientas de Diagnóstico**: Verificación de sensores
+- ?? **Interfaz de NavegaciÃ³n**: Muestra distancia y direcciÃ³n
+- ?? **Sistema de Fallback**: Usa GPS bearing si la brÃºjula no funciona
+- ??? **Herramientas de DiagnÃ³stico**: VerificaciÃ³n de sensores
 
 ---
 
-## ?? Documentación de Brújula
+## ?? DocumentaciÃ³n de BrÃºjula
 
-### ?? ¿Problema con la Brújula? (timestamp: -1)
+### ?? Â¿Problema con la BrÃºjula? (timestamp: -1)
 
 Si ves en los logs:
 ```
-[LocationManager] ?? Brújula - timestamp: -1
+[LocationManager] ?? BrÃºjula - timestamp: -1
 ```
 
 **Lee primero:**
-- ?? [RESPUESTA_RAPIDA.md](./Assets/RESPUESTA_RAPIDA.md) - Solución inmediata
-- ?? [INDICE_DOCUMENTACION_BRUJULA.md](./Assets/INDICE_DOCUMENTACION_BRUJULA.md) - Navegación completa
+- ?? [RESPUESTA_RAPIDA.md](./Assets/docs/RESPUESTA_RAPIDA.md) - SoluciÃ³n inmediata
+- ?? [INDICE_DOCUMENTACION_BRUJULA.md](./Assets/docs/INDICE_DOCUMENTACION_BRUJULA.md) - NavegaciÃ³n completa
 
-### ?? Documentación Disponible
+### ?? DocumentaciÃ³n Disponible
 
-| Documento | Descripción |
+| Documento | DescripciÃ³n |
 |-----------|-------------|
-| [RESPUESTA_RAPIDA.md](./Assets/RESPUESTA_RAPIDA.md) | Respuestas a preguntas frecuentes |
-| [DIAGRAMA_VISUAL_BRUJULA.md](./Assets/DIAGRAMA_VISUAL_BRUJULA.md) | Diagramas visuales del sistema |
-| [SOLUCION_BRUJULA_NO_VALORES.md](./Assets/SOLUCION_BRUJULA_NO_VALORES.md) | Soluciones técnicas |
-| [GUIA_CALIBRAR_BRUJULA.md](./Assets/GUIA_CALIBRAR_BRUJULA.md) | Calibración paso a paso |
-| [GUIA_MAGNETOMETER_DIAGNOSTIC.md](./Assets/GUIA_MAGNETOMETER_DIAGNOSTIC.md) | Herramienta de diagnóstico |
-| [EXPLICACION_NORTE_UNITY.md](./Assets/EXPLICACION_NORTE_UNITY.md) | Teoría completa |
+| [RESPUESTA_RAPIDA.md](./Assets/docs/RESPUESTA_RAPIDA.md) | Respuestas a preguntas frecuentes |
+| [DIAGRAMA_VISUAL_BRUJULA.md](./Assets/docs/DIAGRAMA_VISUAL_BRUJULA.md) | Diagramas visuales del sistema |
+| [SOLUCION_BRUJULA_NO_VALORES.md](./Assets/docs/SOLUCION_BRUJULA_NO_VALORES.md) | Soluciones tÃ©cnicas |
+| [GUIA_CALIBRAR_BRUJULA.md](./Assets/docs/GUIA_CALIBRAR_BRUJULA.md) | CalibraciÃ³n paso a paso |
+| [GUIA_MAGNETOMETER_DIAGNOSTIC.md](./Assets/docs/GUIA_MAGNETOMETER_DIAGNOSTIC.md) | Herramienta de diagnÃ³stico |
+| [EXPLICACION_NORTE_UNITY.md](./Assets/docs/EXPLICACION_NORTE_UNITY.md) | TeorÃ­a completa |
 
 ---
 
 ## ??? Scripts Principales
 
-### Navegación
-- **LocationManager.cs** - Gestión de GPS y brújula
+### NavegaciÃ³n
+- **LocationManager.cs** - GestiÃ³n de GPS y brÃºjula
 - **NavigationArrowController.cs** - Control de flecha AR
 - **NavigationUIManager.cs** - Interfaz de usuario
-- **GeoUtils.cs** - Cálculos geográficos
+- **GeoUtils.cs** - CÃ¡lculos geogrÃ¡ficos
 
-### Diagnóstico
-- **MagnetometerDiagnostic.cs** - Verificación de sensores
-- **CompassCalibrationUI.cs** - UI de calibración
+### DiagnÃ³stico
+- **MagnetometerDiagnostic.cs** - VerificaciÃ³n de sensores
+- **CompassCalibrationUI.cs** - UI de calibraciÃ³n
 - **CompassDebugPanel.cs** - Panel de debug
 
 ### Firebase & Datos
-- **FirebaseManager.cs** - Conexión con Firebase
+- **FirebaseManager.cs** - ConexiÃ³n con Firebase
 - **BuildingData.cs** - Estructura de datos de edificios
 
 ---
 
-## ?? Inicio Rápido
+## ?? Inicio RÃ¡pido
 
 ### Prerrequisitos
 - Unity 2022.3+ 
@@ -91,7 +91,7 @@ Si ves en los logs:
 - AR Foundation
 - Firebase SDK
 
-### Instalación
+### InstalaciÃ³n
 
 1. Clonar el repositorio:
 ```bash
@@ -113,37 +113,37 @@ cd arcProject
 ### Testing en Dispositivo
 
 1. Instalar APK en Android
-2. Otorgar permisos de ubicación
-3. Calibrar brújula (mover en figura de 8)
+2. Otorgar permisos de ubicaciÃ³n
+3. Calibrar brÃºjula (mover en figura de 8)
 4. Salir al exterior para mejor GPS
 5. Seleccionar destino y navegar
 
 ---
 
-## ?? Sistema de Brújula
+## ?? Sistema de BrÃºjula
 
-### ¿Cómo Funciona?
+### Â¿CÃ³mo Funciona?
 
-Unity usa el **magnetómetro** del dispositivo para detectar el campo magnético de la Tierra:
+Unity usa el **magnetÃ³metro** del dispositivo para detectar el campo magnÃ©tico de la Tierra:
 
 ```
-?? Magnetómetro ? Norte Magnético
+?? MagnetÃ³metro ? Norte MagnÃ©tico
      +
-?? GPS ? Declinación magnética
+?? GPS ? DeclinaciÃ³n magnÃ©tica
      ?
 ?? Norte Verdadero
 ```
 
-### Calibración
+### CalibraciÃ³n
 
-Para que la brújula funcione correctamente:
+Para que la brÃºjula funcione correctamente:
 
-1. Abrir app nativa "Brújula" de Android
-2. Mover el teléfono en **forma de 8**
-3. Alejarse de objetos metálicos
+1. Abrir app nativa "BrÃºjula" de Android
+2. Mover el telÃ©fono en **forma de 8**
+3. Alejarse de objetos metÃ¡licos
 4. Preferiblemente al aire libre
 
-Ver guía completa: [GUIA_CALIBRAR_BRUJULA.md](./Assets/GUIA_CALIBRAR_BRUJULA.md)
+Ver guÃ­a completa: [GUIA_CALIBRAR_BRUJULA.md](./Assets/docs/GUIA_CALIBRAR_BRUJULA.md)
 
 ---
 
@@ -158,32 +158,32 @@ Ver guía completa: [GUIA_CALIBRAR_BRUJULA.md](./Assets/GUIA_CALIBRAR_BRUJULA.md)
 
 ---
 
-## ?? Solución de Problemas
+## ?? SoluciÃ³n de Problemas
 
-### Brújula muestra 0.0° constante
-? Ver [SOLUCION_BRUJULA_NO_VALORES.md](./Assets/SOLUCION_BRUJULA_NO_VALORES.md)
+### BrÃºjula muestra 0.0Â° constante
+? Ver [SOLUCION_BRUJULA_NO_VALORES.md](./Assets/docs/SOLUCION_BRUJULA_NO_VALORES.md)
 
 ### GPS no inicializa
-? Ver [SOLUCION_GPS_NO_INICIALIZA.md](./Assets/SOLUCION_GPS_NO_INICIALIZA.md)
+? Ver [SOLUCION_GPS_NO_INICIALIZA.md](./Assets/docs/SOLUCION_GPS_NO_INICIALIZA.md)
 
 ### Flecha AR no apunta correctamente
-? Ver [SOLUCION_FLECHA_DIRECCION.md](./Assets/SOLUCION_FLECHA_DIRECCION.md)
+? Ver [SOLUCION_FLECHA_DIRECCION.md](./Assets/docs/SOLUCION_FLECHA_DIRECCION.md)
 
 ### Permisos no funcionan
-? Ver [SOLUCION_PERMISOS_UBICACION.md](./Assets/SOLUCION_PERMISOS_UBICACION.md)
+? Ver [SOLUCION_PERMISOS_UBICACION.md](./Assets/docs/SOLUCION_PERMISOS_UBICACION.md)
 
 ---
 
 ## ?? Funcionalidades
 
-- ? Navegación AR con flecha direccional
-- ? Cálculo de distancia y bearing
-- ? Detección automática de Norte geográfico
+- ? NavegaciÃ³n AR con flecha direccional
+- ? CÃ¡lculo de distancia y bearing
+- ? DetecciÃ³n automÃ¡tica de Norte geogrÃ¡fico
 - ? Fallback a GPS bearing (en movimiento)
-- ? Panel de depuración en tiempo real
+- ? Panel de depuraciÃ³n en tiempo real
 - ? Sistema de permisos automatizado
-- ? Calibración de brújula guiada
-- ? Diagnóstico de sensores
+- ? CalibraciÃ³n de brÃºjula guiada
+- ? DiagnÃ³stico de sensores
 
 ---
 
@@ -205,11 +205,11 @@ Assets/
 ?   ??? InfoPanel.prefab
 ?   ??? LocationButton.prefab
 ?
-??? Documentación/
+??? DocumentaciÃ³n/
     ??? INDICE_DOCUMENTACION_BRUJULA.md
     ??? RESPUESTA_RAPIDA.md
     ??? GUIA_CALIBRAR_BRUJULA.md
-    ??? ... (ver índice completo)
+    ??? ... (ver Ã­ndice completo)
 ```
 
 ---
@@ -226,9 +226,9 @@ Proyecto desarrollado para la asignatura de Arquitectura de Computadoras - Unive
 
 ---
 
-## ?? Enlaces Útiles
+## ?? Enlaces Ãštiles
 
-- [Documentación Unity AR Foundation](https://docs.unity3d.com/Packages/com.unity.xr.arfoundation@5.0/manual/index.html)
+- [DocumentaciÃ³n Unity AR Foundation](https://docs.unity3d.com/Packages/com.unity.xr.arfoundation@5.0/manual/index.html)
 - [Input.compass API](https://docs.unity3d.com/ScriptReference/Input-compass.html)
 - [Firebase Unity](https://firebase.google.com/docs/unity/setup)
 
@@ -236,9 +236,9 @@ Proyecto desarrollado para la asignatura de Arquitectura de Computadoras - Unive
 
 ## ?? Soporte
 
-Para problemas con la brújula o navegación, consulta primero:
-- [INDICE_DOCUMENTACION_BRUJULA.md](./Assets/INDICE_DOCUMENTACION_BRUJULA.md)
-- [RESPUESTA_RAPIDA.md](./Assets/RESPUESTA_RAPIDA.md)
+Para problemas con la brÃºjula o navegaciÃ³n, consulta primero:
+- [INDICE_DOCUMENTACION_BRUJULA.md](./Assets/docs/INDICE_DOCUMENTACION_BRUJULA.md)
+- [RESPUESTA_RAPIDA.md](./Assets/docs/RESPUESTA_RAPIDA.md)
 
 ---
 

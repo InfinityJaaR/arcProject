@@ -6,18 +6,18 @@ using UnityEditor;
 #endif
 
 /// <summary>
-/// Men˙ de herramientas para arreglar r·pidamente el botÛn de navegaciÛn
+/// Men√∫ de herramientas para arreglar r√°pidamente el bot√≥n de navegaci√≥n
 /// Usa: AR Tools > Fix Navigation Button > ...
 /// </summary>
 public class NavigationButtonQuickFix : MonoBehaviour
 {
     #if UNITY_EDITOR
     
-    [MenuItem("AR Tools/Fix Navigation Button/1. DiagnÛstico Completo", false, 1)]
+    [MenuItem("AR Tools/Fix Navigation Button/1. Diagn√≥stico Completo", false, 1)]
     static void RunFullDiagnostic()
     {
         Debug.Log("???????????????????????????????????????????????");
-        Debug.Log("?? EJECUTANDO DIAGN”STICO COMPLETO");
+        Debug.Log("?? EJECUTANDO DIAGN√ìSTICO COMPLETO");
         Debug.Log("???????????????????????????????????????????????");
         
         // Encontrar o crear NavigationButtonFixer
@@ -40,70 +40,70 @@ public class NavigationButtonQuickFix : MonoBehaviour
         // Si estamos en Play mode, ejecutar inmediatamente
         if (EditorApplication.isPlaying)
         {
-            Debug.Log("?? Modo Play detectado - DiagnÛstico se ejecutar· autom·ticamente");
+            Debug.Log("?? Modo Play detectado - Diagn√≥stico se ejecutar√° autom√°ticamente");
         }
         else
         {
-            Debug.Log("?? No est·s en Play mode");
-            Debug.Log("?? SOLUCI”N: Presiona Play ?? para ejecutar el diagnÛstico");
+            Debug.Log("?? No est√°s en Play mode");
+            Debug.Log("?? SOLUCI√ìN: Presiona Play ?? para ejecutar el diagn√≥stico");
         }
         
         Selection.activeGameObject = fixer.gameObject;
     }
     
-    [MenuItem("AR Tools/Fix Navigation Button/2. AÒadir ForceButtonWork al BotÛn", false, 2)]
+    [MenuItem("AR Tools/Fix Navigation Button/2. A√±adir ForceButtonWork al Bot√≥n", false, 2)]
     static void AddForceButtonWork()
     {
         Debug.Log("???????????????????????????????????????????????");
-        Debug.Log("?? A—ADIENDO FORCEBUTTONWORK");
+        Debug.Log("?? A√ëADIENDO FORCEBUTTONWORK");
         Debug.Log("???????????????????????????????????????????????");
         
-        // Buscar el botÛn
+        // Buscar el bot√≥n
         Button button = FindNavigationButton();
         
         if (button == null)
         {
-            Debug.LogError("? No se encontrÛ el botÛn de navegaciÛn");
-            Debug.LogError("?? SOLUCI”N: Selecciona el botÛn manualmente y vuelve a ejecutar");
+            Debug.LogError("? No se encontr√≥ el bot√≥n de navegaci√≥n");
+            Debug.LogError("?? SOLUCI√ìN: Selecciona el bot√≥n manualmente y vuelve a ejecutar");
             return;
         }
         
-        Debug.Log($"? BotÛn encontrado: {button.gameObject.name}");
+        Debug.Log($"? Bot√≥n encontrado: {button.gameObject.name}");
         
         // Verificar si ya tiene ForceButtonWork
         ForceButtonWork existing = button.GetComponent<ForceButtonWork>();
         if (existing != null)
         {
-            Debug.LogWarning("?? ForceButtonWork ya est· en el botÛn");
-            Debug.Log("?? Si el botÛn sigue sin funcionar, revisa la configuraciÛn");
+            Debug.LogWarning("?? ForceButtonWork ya est√° en el bot√≥n");
+            Debug.Log("?? Si el bot√≥n sigue sin funcionar, revisa la configuraci√≥n");
             Selection.activeGameObject = button.gameObject;
             return;
         }
         
-        // AÒadir ForceButtonWork
+        // A√±adir ForceButtonWork
         ForceButtonWork forceWork = button.gameObject.AddComponent<ForceButtonWork>();
         forceWork.useManualTouchDetection = true;
         forceWork.usePointerInterfaces = true;
         forceWork.forceInteractable = true;
         forceWork.debugLogs = true;
         
-        Debug.Log("? ForceButtonWork aÒadido al botÛn");
-        Debug.Log("? ConfiguraciÛn aplicada:");
+        Debug.Log("? ForceButtonWork a√±adido al bot√≥n");
+        Debug.Log("? Configuraci√≥n aplicada:");
         Debug.Log("   - useManualTouchDetection: true");
         Debug.Log("   - usePointerInterfaces: true");
         Debug.Log("   - forceInteractable: true");
         Debug.Log("   - debugLogs: true");
-        Debug.Log("?? Presiona Play ?? y prueba el botÛn");
+        Debug.Log("?? Presiona Play ?? y prueba el bot√≥n");
         
         Selection.activeGameObject = button.gameObject;
         EditorUtility.SetDirty(button.gameObject);
     }
     
-    [MenuItem("AR Tools/Fix Navigation Button/3. ReparaciÛn R·pida (Todo en Uno)", false, 3)]
+    [MenuItem("AR Tools/Fix Navigation Button/3. Reparaci√≥n R√°pida (Todo en Uno)", false, 3)]
     static void QuickFixAll()
     {
         Debug.Log("???????????????????????????????????????????????");
-        Debug.Log("? REPARACI”N R¡PIDA - TODO EN UNO");
+        Debug.Log("? REPARACI√ìN R√ÅPIDA - TODO EN UNO");
         Debug.Log("???????????????????????????????????????????????");
         
         int fixes = 0;
@@ -116,7 +116,7 @@ public class NavigationButtonQuickFix : MonoBehaviour
             GameObject esObj = new GameObject("EventSystem");
             esObj.AddComponent<EventSystem>();
             
-            // AÒadir el mÛdulo correcto
+            // A√±adir el m√≥dulo correcto
             System.Type inputSystemModuleType = System.Type.GetType("UnityEngine.InputSystem.UI.InputSystemUIInputModule, Unity.InputSystem");
             if (inputSystemModuleType != null)
             {
@@ -152,7 +152,7 @@ public class NavigationButtonQuickFix : MonoBehaviour
                 else
                 {
                     Debug.LogError("? No se pudo encontrar InputSystemUIInputModule");
-                    Debug.LogError("?? SOLUCI”N MANUAL: Selecciona EventSystem y click en 'Replace with InputSystemUIInputModule'");
+                    Debug.LogError("?? SOLUCI√ìN MANUAL: Selecciona EventSystem y click en 'Replace with InputSystemUIInputModule'");
                 }
             }
         }
@@ -166,7 +166,7 @@ public class NavigationButtonQuickFix : MonoBehaviour
             if (raycaster == null)
             {
                 canvas.gameObject.AddComponent<GraphicRaycaster>();
-                Debug.Log($"? GraphicRaycaster aÒadido a: {canvas.gameObject.name}");
+                Debug.Log($"? GraphicRaycaster a√±adido a: {canvas.gameObject.name}");
                 fixes++;
             }
         }
@@ -177,14 +177,14 @@ public class NavigationButtonQuickFix : MonoBehaviour
         if (uiManager == null)
         {
             Debug.LogWarning("?? NavigationUIManager no encontrado");
-            Debug.LogWarning("?? Aseg˙rate de tener NavigationCanvas en la escena");
+            Debug.LogWarning("?? Aseg√∫rate de tener NavigationCanvas en la escena");
         }
         else
         {
             Debug.Log("? NavigationUIManager encontrado");
             
-            // 4. BotÛn
-            Debug.Log("\n4?? Verificando y reparando botÛn...");
+            // 4. Bot√≥n
+            Debug.Log("\n4?? Verificando y reparando bot√≥n...");
             Button button = null;
             
             if (uiManager.openLocationPanelButton != null)
@@ -197,7 +197,7 @@ public class NavigationButtonQuickFix : MonoBehaviour
                 if (button != null)
                 {
                     uiManager.openLocationPanelButton = button;
-                    Debug.Log("? BotÛn asignado en NavigationUIManager");
+                    Debug.Log("? Bot√≥n asignado en NavigationUIManager");
                     fixes++;
                 }
             }
@@ -208,7 +208,7 @@ public class NavigationButtonQuickFix : MonoBehaviour
                 if (!button.interactable)
                 {
                     button.interactable = true;
-                    Debug.Log("? BotÛn hecho interactable");
+                    Debug.Log("? Bot√≥n hecho interactable");
                     fixes++;
                 }
                 
@@ -221,7 +221,7 @@ public class NavigationButtonQuickFix : MonoBehaviour
                     fixes++;
                 }
                 
-                // AÒadir ForceButtonWork si no lo tiene
+                // A√±adir ForceButtonWork si no lo tiene
                 if (button.GetComponent<ForceButtonWork>() == null)
                 {
                     ForceButtonWork forceWork = button.gameObject.AddComponent<ForceButtonWork>();
@@ -229,7 +229,7 @@ public class NavigationButtonQuickFix : MonoBehaviour
                     forceWork.usePointerInterfaces = true;
                     forceWork.forceInteractable = true;
                     forceWork.debugLogs = true;
-                    Debug.Log("? ForceButtonWork aÒadido");
+                    Debug.Log("? ForceButtonWork a√±adido");
                     fixes++;
                 }
                 
@@ -237,33 +237,33 @@ public class NavigationButtonQuickFix : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning("?? No se pudo encontrar el botÛn");
+                Debug.LogWarning("?? No se pudo encontrar el bot√≥n");
             }
             
             EditorUtility.SetDirty(uiManager.gameObject);
         }
         
-        // 5. AÒadir NavigationButtonFixer
-        Debug.Log("\n5?? AÒadiendo herramientas de diagnÛstico...");
+        // 5. A√±adir NavigationButtonFixer
+        Debug.Log("\n5?? A√±adiendo herramientas de diagn√≥stico...");
         if (FindObjectOfType<NavigationButtonFixer>() == null)
         {
             GameObject fixerObj = new GameObject("NavigationButtonFixer");
             NavigationButtonFixer fixer = fixerObj.AddComponent<NavigationButtonFixer>();
             fixer.autoFix = true;
             fixer.verboseLogging = true;
-            Debug.Log("? NavigationButtonFixer aÒadido");
+            Debug.Log("? NavigationButtonFixer a√±adido");
             fixes++;
         }
         
         // Resumen
         Debug.Log("\n???????????????????????????????????????????????");
-        Debug.Log($"? REPARACI”N COMPLETADA");
+        Debug.Log($"? REPARACI√ìN COMPLETADA");
         Debug.Log($"?? Se aplicaron {fixes} correcciones");
         Debug.Log("???????????????????????????????????????????????");
-        Debug.Log("?? SIGUIENTE PASO: Presiona Play ?? y prueba el botÛn");
+        Debug.Log("?? SIGUIENTE PASO: Presiona Play ?? y prueba el bot√≥n");
     }
     
-    [MenuItem("AR Tools/Fix Navigation Button/4. AÒadir Info en Pantalla", false, 4)]
+    [MenuItem("AR Tools/Fix Navigation Button/4. A√±adir Info en Pantalla", false, 4)]
     static void AddStatusDisplay()
     {
         NavigationSystemStatus status = FindObjectOfType<NavigationSystemStatus>();
@@ -279,13 +279,13 @@ public class NavigationButtonQuickFix : MonoBehaviour
         status = statusObj.AddComponent<NavigationSystemStatus>();
         status.showOnStart = true;
         
-        Debug.Log("? NavigationSystemStatus aÒadido");
+        Debug.Log("? NavigationSystemStatus a√±adido");
         Debug.Log("?? En Play mode, presiona [I] para mostrar/ocultar info");
         
         Selection.activeGameObject = statusObj;
     }
     
-    [MenuItem("AR Tools/Fix Navigation Button/5. AÒadir Auto-Tester", false, 5)]
+    [MenuItem("AR Tools/Fix Navigation Button/5. A√±adir Auto-Tester", false, 5)]
     static void AddAutoTester()
     {
         AutoButtonTester tester = FindObjectOfType<AutoButtonTester>();
@@ -301,7 +301,7 @@ public class NavigationButtonQuickFix : MonoBehaviour
         tester = testerObj.AddComponent<AutoButtonTester>();
         tester.autoTestOnStart = false; // No auto-test por defecto
         
-        Debug.Log("? AutoButtonTester aÒadido");
+        Debug.Log("? AutoButtonTester a√±adido");
         Debug.Log("?? En Play mode, presiona [T] para ejecutar test");
         
         Selection.activeGameObject = testerObj;
@@ -310,17 +310,17 @@ public class NavigationButtonQuickFix : MonoBehaviour
     [MenuItem("AR Tools/Fix Navigation Button/?????????", false, 10)]
     static void Separator() { }
     
-    [MenuItem("AR Tools/Fix Navigation Button/?? Abrir GuÌa R·pida", false, 11)]
+    [MenuItem("AR Tools/Fix Navigation Button/?? Abrir Gu√≠a R√°pida", false, 11)]
     static void OpenQuickGuide()
     {
-        string path = "Assets/GUIA_RAPIDA_BOTON.md";
+        string path = "Assets/docs/GUIA_RAPIDA_BOTON.md";
         UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(path, 1);
     }
     
-    [MenuItem("AR Tools/Fix Navigation Button/?? Abrir GuÌa Completa", false, 12)]
+    [MenuItem("AR Tools/Fix Navigation Button/?? Abrir Gu√≠a Completa", false, 12)]
     static void OpenFullGuide()
     {
-        string path = "Assets/SOLUCION_BOTON_NAVEGACION.md";
+        string path = "Assets/docs/SOLUCION_BOTON_NAVEGACION.md";
         UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(path, 1);
     }
     
@@ -381,7 +381,7 @@ public class NavigationButtonQuickFix : MonoBehaviour
         Debug.Log("?? Usa esto antes de hacer el build final");
     }
     
-    // Utilidad: Buscar el botÛn de navegaciÛn
+    // Utilidad: Buscar el bot√≥n de navegaci√≥n
     static Button FindNavigationButton()
     {
         // Primero buscar en NavigationUIManager

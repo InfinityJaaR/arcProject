@@ -8,6 +8,9 @@ using UnityEngine;
 [Serializable]
 public class BuildingData
 {
+    /// <summary>Firestore document ID — join key with AR reference image name.</summary>
+    public string documentId;
+
     public string name;            // Nombre del edificio (ej: "Biblioteca Central")
     public string description;     // Descripción detallada del lugar
     public double latitude;        // Coordenada de latitud

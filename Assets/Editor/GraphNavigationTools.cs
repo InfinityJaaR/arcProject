@@ -3,39 +3,39 @@ using UnityEditor;
 using System.IO;
 
 /// <summary>
-/// Menú de herramientas para el sistema de navegación por grafo
+/// MenÃº de herramientas para el sistema de navegaciÃ³n por grafo
 /// Proporciona utilidades para verificar, corregir y documentar el sistema
 /// </summary>
 public class GraphNavigationTools
 {
-    [MenuItem("AR Navigation/?? Abrir Documentación/README Principal")]
+    [MenuItem("AR Navigation/?? Abrir DocumentaciÃ³n/README Principal")]
     public static void OpenReadme()
     {
-        OpenFile("Assets/README_NAVEGACION_GRAFO.md");
+        OpenFile("Assets/docs/README_NAVEGACION_GRAFO.md");
     }
     
-    [MenuItem("AR Navigation/?? Abrir Documentación/Guía Completa")]
+    [MenuItem("AR Navigation/?? Abrir DocumentaciÃ³n/GuÃ­a Completa")]
     public static void OpenGuia()
     {
-        OpenFile("Assets/GUIA_NAVEGACION_GRAFO.md");
+        OpenFile("Assets/docs/GUIA_NAVEGACION_GRAFO.md");
     }
     
-    [MenuItem("AR Navigation/?? Abrir Documentación/Instrucciones Firestore")]
+    [MenuItem("AR Navigation/?? Abrir DocumentaciÃ³n/Instrucciones Firestore")]
     public static void OpenInstrucciones()
     {
-        OpenFile("Assets/INSTRUCCIONES_FIRESTORE_GRAFO.md");
+        OpenFile("Assets/docs/INSTRUCCIONES_FIRESTORE_GRAFO.md");
     }
     
-    [MenuItem("AR Navigation/?? Abrir Documentación/Ejemplos Firestore")]
+    [MenuItem("AR Navigation/?? Abrir DocumentaciÃ³n/Ejemplos Firestore")]
     public static void OpenEjemplos()
     {
-        OpenFile("Assets/EJEMPLO_FIRESTORE_GRAFO.md");
+        OpenFile("Assets/docs/EJEMPLO_FIRESTORE_GRAFO.md");
     }
     
-    [MenuItem("AR Navigation/?? Abrir Documentación/Diagrama Arquitectura")]
+    [MenuItem("AR Navigation/?? Abrir DocumentaciÃ³n/Diagrama Arquitectura")]
     public static void OpenDiagrama()
     {
-        OpenFile("Assets/DIAGRAMA_ARQUITECTURA_GRAFO.md");
+        OpenFile("Assets/docs/DIAGRAMA_ARQUITECTURA_GRAFO.md");
     }
     
     [MenuItem("AR Navigation/?? Configurar Sistema Completo")]
@@ -44,7 +44,7 @@ public class GraphNavigationTools
         SetupGraphNavigation.ShowWindow();
     }
     
-    [MenuItem("AR Navigation/?? Verificar Configuración")]
+    [MenuItem("AR Navigation/?? Verificar ConfiguraciÃ³n")]
     public static void VerificarConfiguracion()
     {
         VerifySetup();
@@ -63,7 +63,7 @@ public class GraphNavigationTools
             EditorUtility.DisplayDialog(
                 "Cache Limpiado ?",
                 "El cache de Firebase ha sido limpiado.\n\n" +
-                "La próxima vez que ejecutes la app, se volverán a descargar todos los datos.",
+                "La prÃ³xima vez que ejecutes la app, se volverÃ¡n a descargar todos los datos.",
                 "OK"
             );
         }
@@ -73,7 +73,7 @@ public class GraphNavigationTools
             
             EditorUtility.DisplayDialog(
                 "Error ?",
-                "No se encontró FirebaseManager en la escena actual.",
+                "No se encontrÃ³ FirebaseManager en la escena actual.",
                 "OK"
             );
         }
@@ -83,10 +83,10 @@ public class GraphNavigationTools
     public static void GenerarReporte()
     {
         string report = "???????????????????????????????????????????????????????\n";
-        report += "?? REPORTE DEL SISTEMA DE NAVEGACIÓN POR GRAFO\n";
+        report += "?? REPORTE DEL SISTEMA DE NAVEGACIÃ“N POR GRAFO\n";
         report += "???????????????????????????????????????????????????????\n\n";
         
-        // Información general
+        // InformaciÃ³n general
         report += "?? Fecha: " + System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\n";
         report += "?? Escena Actual: " + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name + "\n\n";
         
@@ -100,9 +100,9 @@ public class GraphNavigationTools
         if (graphNav != null)
         {
             report += "? GraphNavigationManager\n";
-            report += $"   • GameObject: {graphNav.gameObject.name}\n";
-            report += $"   • Node Reached Distance: {graphNav.nodeReachedDistance}m\n";
-            report += $"   • Update Interval: {graphNav.updateInterval}s\n";
+            report += $"   Â• GameObject: {graphNav.gameObject.name}\n";
+            report += $"   Â• Node Reached Distance: {graphNav.nodeReachedDistance}m\n";
+            report += $"   Â• Update Interval: {graphNav.updateInterval}s\n";
         }
         else
         {
@@ -116,18 +116,18 @@ public class GraphNavigationTools
         if (appMode != null)
         {
             report += "? AppModeManager\n";
-            report += $"   • GameObject: {appMode.gameObject.name}\n";
+            report += $"   Â• GameObject: {appMode.gameObject.name}\n";
             
             SerializedObject so = new SerializedObject(appMode);
             SerializedProperty graphNavProp = so.FindProperty("graphNavigationManager");
             
             if (graphNavProp != null && graphNavProp.objectReferenceValue != null)
             {
-                report += "   • GraphNavigationManager: ? Asignado\n";
+                report += "   Â• GraphNavigationManager: ? Asignado\n";
             }
             else
             {
-                report += "   • GraphNavigationManager: ? NO ASIGNADO\n";
+                report += "   Â• GraphNavigationManager: ? NO ASIGNADO\n";
             }
         }
         else
@@ -142,18 +142,18 @@ public class GraphNavigationTools
         if (arrow != null)
         {
             report += "? NavigationArrowController\n";
-            report += $"   • GameObject: {arrow.gameObject.name}\n";
+            report += $"   Â• GameObject: {arrow.gameObject.name}\n";
             
             SerializedObject so = new SerializedObject(arrow);
             SerializedProperty progressTextProp = so.FindProperty("progressText");
             
             if (progressTextProp != null && progressTextProp.objectReferenceValue != null)
             {
-                report += "   • Progress Text: ? Asignado\n";
+                report += "   Â• Progress Text: ? Asignado\n";
             }
             else
             {
-                report += "   • Progress Text: ?? No asignado (opcional)\n";
+                report += "   Â• Progress Text: ?? No asignado (opcional)\n";
             }
         }
         else
@@ -168,7 +168,7 @@ public class GraphNavigationTools
         if (firebase != null)
         {
             report += "? FirebaseManager\n";
-            report += $"   • GameObject: {firebase.gameObject.name}\n";
+            report += $"   Â• GameObject: {firebase.gameObject.name}\n";
             
             SerializedObject so = new SerializedObject(firebase);
             SerializedProperty collectionProp = so.FindProperty("collectionName");
@@ -176,15 +176,15 @@ public class GraphNavigationTools
             
             if (collectionProp != null)
             {
-                report += $"   • Collection Name: '{collectionProp.stringValue}'\n";
+                report += $"   Â• Collection Name: '{collectionProp.stringValue}'\n";
             }
             
             if (graphEdgesProp != null)
             {
-                report += $"   • Graph Edges Collection: '{graphEdgesProp.stringValue}'\n";
+                report += $"   Â• Graph Edges Collection: '{graphEdgesProp.stringValue}'\n";
             }
             
-            report += $"   • Cache Count: {firebase.GetCacheCount()}\n";
+            report += $"   Â• Cache Count: {firebase.GetCacheCount()}\n";
         }
         else
         {
@@ -219,7 +219,7 @@ public class GraphNavigationTools
         
         report += "\n";
         report += "??????????????????????????????????????????????????\n";
-        report += "DOCUMENTACIÓN DISPONIBLE\n";
+        report += "DOCUMENTACIÃ“N DISPONIBLE\n";
         report += "??????????????????????????????????????????????????\n\n";
         
         string[] docs = new string[]
@@ -260,8 +260,8 @@ public class GraphNavigationTools
             report += "?? Crea un GameObject con FirebaseManager\n";
         }
         
-        report += "?? Lee Assets/README_NAVEGACION_GRAFO.md para comenzar\n";
-        report += "?? Configura Firestore según INSTRUCCIONES_FIRESTORE_GRAFO.md\n";
+        report += "?? Lee Assets/docs/README_NAVEGACION_GRAFO.md para comenzar\n";
+        report += "?? Configura Firestore segÃºn INSTRUCCIONES_FIRESTORE_GRAFO.md\n";
         
         report += "\n???????????????????????????????????????????????????????\n";
         
@@ -276,7 +276,7 @@ public class GraphNavigationTools
             "Reporte Generado ?",
             $"El reporte ha sido generado exitosamente.\n\n" +
             $"Archivo guardado en:\n{reportPath}\n\n" +
-            $"También se imprimió en la consola.",
+            $"TambiÃ©n se imprimiÃ³ en la consola.",
             "OK"
         );
         
@@ -322,7 +322,7 @@ public class GraphNavigationTools
             }
         }
         
-        // Problema 3: FirebaseManager con campos vacíos
+        // Problema 3: FirebaseManager con campos vacÃ­os
         FirebaseManager firebase = Object.FindObjectOfType<FirebaseManager>();
         if (firebase != null)
         {
@@ -363,8 +363,8 @@ public class GraphNavigationTools
         {
             EditorUtility.DisplayDialog(
                 "Error",
-                "No se encontró NavigationArrowController en la escena.\n\n" +
-                "Asegúrate de tener el GameObject con este componente.",
+                "No se encontrÃ³ NavigationArrowController en la escena.\n\n" +
+                "AsegÃºrate de tener el GameObject con este componente.",
                 "OK"
             );
             return;
@@ -377,7 +377,7 @@ public class GraphNavigationTools
         {
             EditorUtility.DisplayDialog(
                 "Error",
-                "No se encontró el prefab 'Arrow' en el proyecto.\n\n" +
+                "No se encontrÃ³ el prefab 'Arrow' en el proyecto.\n\n" +
                 "Verifica que exista en Assets/Prefabs/Arrow.prefab",
                 "OK"
             );
@@ -416,7 +416,7 @@ public class GraphNavigationTools
             EditorGUIUtility.PingObject(navController.gameObject);
             
             EditorUtility.DisplayDialog(
-                "Éxito ?",
+                "Ã‰xito ?",
                 $"Arrow Prefab asignado correctamente.\n\n" +
                 $"GameObject: {navController.gameObject.name}\n" +
                 $"Prefab: Arrow.prefab\n\n" +
@@ -428,8 +428,8 @@ public class GraphNavigationTools
         {
             EditorUtility.DisplayDialog(
                 "Error",
-                "No se encontró el campo 'arrowPrefab' en NavigationArrowController.\n\n" +
-                "Verifica que el script esté actualizado.",
+                "No se encontrÃ³ el campo 'arrowPrefab' en NavigationArrowController.\n\n" +
+                "Verifica que el script estÃ© actualizado.",
                 "OK"
             );
         }
@@ -443,7 +443,7 @@ public class GraphNavigationTools
         if (navController == null)
         {
             EditorUtility.DisplayDialog(
-                "Verificación",
+                "VerificaciÃ³n",
                 "? NavigationArrowController no encontrado en la escena.",
                 "OK"
             );
@@ -453,16 +453,16 @@ public class GraphNavigationTools
         SerializedObject so = new SerializedObject(navController);
         SerializedProperty arrowPrefabProp = so.FindProperty("arrowPrefab");
         
-        string mensaje = $"?? VERIFICACIÓN DE ARROW PREFAB\n\n";
+        string mensaje = $"?? VERIFICACIÃ“N DE ARROW PREFAB\n\n";
         mensaje += $"GameObject: {navController.gameObject.name}\n\n";
         
         if (arrowPrefabProp != null && arrowPrefabProp.objectReferenceValue != null)
         {
             mensaje += $"? Arrow Prefab: ASIGNADO\n";
             mensaje += $"   Prefab: {arrowPrefabProp.objectReferenceValue.name}\n\n";
-            mensaje += "Todo está correcto.";
+            mensaje += "Todo estÃ¡ correcto.";
             
-            Debug.Log("? Arrow Prefab está asignado correctamente");
+            Debug.Log("? Arrow Prefab estÃ¡ asignado correctamente");
         }
         else
         {
@@ -470,10 +470,10 @@ public class GraphNavigationTools
             mensaje += "Ejecuta:\n";
             mensaje += "'AR Navigation ? Reparar Referencias ? Asignar Arrow Prefab'";
             
-            Debug.LogWarning("? Arrow Prefab NO está asignado");
+            Debug.LogWarning("? Arrow Prefab NO estÃ¡ asignado");
         }
         
-        EditorUtility.DisplayDialog("Verificación de Arrow Prefab", mensaje, "OK");
+        EditorUtility.DisplayDialog("VerificaciÃ³n de Arrow Prefab", mensaje, "OK");
         
         // Seleccionar el objeto
         Selection.activeGameObject = navController.gameObject;
@@ -485,7 +485,7 @@ public class GraphNavigationTools
         bool hasErrors = false;
         string message = "";
         
-        // Verificar componentes críticos
+        // Verificar componentes crÃ­ticos
         if (Object.FindObjectOfType<GraphNavigationManager>() == null)
         {
             hasErrors = true;
@@ -508,7 +508,7 @@ public class GraphNavigationTools
         {
             Debug.LogWarning(message);
             EditorUtility.DisplayDialog(
-                "Verificación Fallida ??",
+                "VerificaciÃ³n Fallida ??",
                 "Faltan componentes necesarios:\n\n" + message + "\n" +
                 "Ejecuta 'AR Navigation > Configurar Sistema Completo'",
                 "Entendido"
@@ -516,11 +516,11 @@ public class GraphNavigationTools
         }
         else
         {
-            Debug.Log("? Todos los componentes principales están presentes");
+            Debug.Log("? Todos los componentes principales estÃ¡n presentes");
             EditorUtility.DisplayDialog(
-                "Verificación Exitosa ?",
-                "Todos los componentes principales están presentes.\n\n" +
-                "Para una verificación detallada, usa:\n" +
+                "VerificaciÃ³n Exitosa ?",
+                "Todos los componentes principales estÃ¡n presentes.\n\n" +
+                "Para una verificaciÃ³n detallada, usa:\n" +
                 "'AR Navigation > Generar Reporte del Sistema'",
                 "OK"
             );

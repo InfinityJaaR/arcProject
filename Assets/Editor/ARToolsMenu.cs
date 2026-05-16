@@ -2,14 +2,14 @@ using UnityEngine;
 using UnityEditor;
 
 /// <summary>
-/// Menu de acceso r·pido a todas las herramientas AR
+/// Menu de acceso r√°pido a todas las herramientas AR
 /// </summary>
 public class ARToolsMenu
 {
-    [MenuItem("AR Tools/?? Ver Resumen de SoluciÛn")]
+    [MenuItem("AR Tools/?? Ver Resumen de Soluci√≥n")]
     public static void OpenSolutionSummary()
     {
-        string path = "Assets/README_SOLUCION.md";
+        string path = "Assets/docs/README_SOLUCION.md";
         if (System.IO.File.Exists(path))
         {
             Application.OpenURL("file:///" + System.IO.Path.GetFullPath(path));
@@ -20,20 +20,20 @@ public class ARToolsMenu
         }
     }
 
-    [MenuItem("AR Tools/?? Ver GuÌa de Im·genes")]
+    [MenuItem("AR Tools/?? Ver Gu√≠a de Im√°genes")]
     public static void OpenImageGuide()
     {
-        string path = "Assets/GUIA_IMAGENES_AR.md";
+        string path = "Assets/docs/GUIA_IMAGENES_AR.md";
         if (System.IO.File.Exists(path))
         {
             Application.OpenURL("file:///" + System.IO.Path.GetFullPath(path));
         }
     }
 
-    [MenuItem("AR Tools/?? Ver SoluciÛn Detallada")]
+    [MenuItem("AR Tools/?? Ver Soluci√≥n Detallada")]
     public static void OpenDetailedSolution()
     {
-        string path = "Assets/SOLUCION_ERROR_KEYPOINTS.md";
+        string path = "Assets/docs/SOLUCION_ERROR_KEYPOINTS.md";
         if (System.IO.File.Exists(path))
         {
             Application.OpenURL("file:///" + System.IO.Path.GetFullPath(path));
@@ -49,7 +49,7 @@ public class ARToolsMenu
         {
             EditorUtility.DisplayDialog(
                 "No encontrado",
-                "No se encontrÛ ninguna Reference Image Library en el proyecto.",
+                "No se encontr√≥ ninguna Reference Image Library en el proyecto.",
                 "OK"
             );
             return;
@@ -79,33 +79,33 @@ public class ARToolsMenu
         {
             EditorUtility.DisplayDialog(
                 "Carpeta no encontrada",
-                "No se encontrÛ la carpeta Assets/Markers",
+                "No se encontr√≥ la carpeta Assets/Markers",
                 "OK"
             );
         }
     }
 
-    [MenuItem("AR Tools/?? Ayuda R·pida")]
+    [MenuItem("AR Tools/?? Ayuda R√°pida")]
     public static void ShowQuickHelp()
     {
         EditorUtility.DisplayDialog(
-            "Herramientas AR - Ayuda R·pida",
+            "Herramientas AR - Ayuda R√°pida",
             "ERROR: 'Failed to get enough keypoints'\n\n" +
-            "SOLUCIONES R¡PIDAS:\n\n" +
+            "SOLUCIONES R√ÅPIDAS:\n\n" +
             "1. GENERAR MARCADORES NUEVOS:\n" +
             "   ? AR Tools > Generar Marcador de Prueba\n\n" +
-            "2. VALIDAR IM¡GENES ACTUALES:\n" +
+            "2. VALIDAR IM√ÅGENES ACTUALES:\n" +
             "   ? AR Tools > Image Tracking Validator\n\n" +
-            "3. MEJORAR IM¡GENES:\n" +
-            "   ï Aumentar contraste\n" +
-            "   ï AÒadir bordes y texto\n" +
-            "   ï Evitar colores sÛlidos\n\n" +
-            "4. ESPECIFICAR TAMA—O:\n" +
-            "   ï Abrir Reference Image Library\n" +
-            "   ï Marcar 'Specify Size'\n" +
-            "   ï Configurar: 0.2 x 0.2 metros\n\n" +
-            "DOCUMENTACI”N COMPLETA:\n" +
-            "? AR Tools > Ver GuÌa de Im·genes",
+            "3. MEJORAR IM√ÅGENES:\n" +
+            "   ¬ï Aumentar contraste\n" +
+            "   ¬ï A√±adir bordes y texto\n" +
+            "   ¬ï Evitar colores s√≥lidos\n\n" +
+            "4. ESPECIFICAR TAMA√ëO:\n" +
+            "   ¬ï Abrir Reference Image Library\n" +
+            "   ¬ï Marcar 'Specify Size'\n" +
+            "   ¬ï Configurar: 0.2 x 0.2 metros\n\n" +
+            "DOCUMENTACI√ìN COMPLETA:\n" +
+            "? AR Tools > Ver Gu√≠a de Im√°genes",
             "Entendido"
         );
     }
@@ -121,7 +121,7 @@ public class ARToolsMenu
         
         if (rilGuids.Length == 0)
         {
-            Debug.LogError("   ? NO se encontrÛ Reference Image Library");
+            Debug.LogError("   ? NO se encontr√≥ Reference Image Library");
         }
         else
         {
@@ -182,13 +182,13 @@ public class ARToolsMenu
             }
         }
 
-        // Test 5: DocumentaciÛn
-        Debug.Log("\n5. Verificando documentaciÛn...");
+        // Test 5: Documentaci√≥n
+        Debug.Log("\n5. Verificando documentaci√≥n...");
         string[] docs = new string[]
         {
-            "Assets/README_SOLUCION.md",
-            "Assets/SOLUCION_ERROR_KEYPOINTS.md",
-            "Assets/GUIA_IMAGENES_AR.md"
+            "Assets/docs/README_SOLUCION.md",
+            "Assets/docs/SOLUCION_ERROR_KEYPOINTS.md",
+            "Assets/docs/GUIA_IMAGENES_AR.md"
         };
 
         foreach (string doc in docs)
@@ -213,7 +213,7 @@ public class ARToolsMenu
         );
     }
 
-    [MenuItem("AR Tools/?? Crear Backup de ConfiguraciÛn")]
+    [MenuItem("AR Tools/?? Crear Backup de Configuraci√≥n")]
     public static void CreateBackup()
     {
         string timestamp = System.DateTime.Now.ToString("yyyyMMdd_HHmmss");
@@ -240,7 +240,7 @@ public class ARToolsMenu
         Debug.Log($"[ARTools] ? Backup creado: {backupPath}");
         EditorUtility.DisplayDialog(
             "Backup Creado",
-            $"Backup de configuraciÛn AR creado exitosamente:\n{backupPath}",
+            $"Backup de configuraci√≥n AR creado exitosamente:\n{backupPath}",
             "OK"
         );
     }

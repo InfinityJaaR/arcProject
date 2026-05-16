@@ -9,19 +9,19 @@ public class ARToolsWelcome
 {
     static ARToolsWelcome()
     {
-        // Ejecutar despuÈs de que Unity termine de cargar
+        // Ejecutar despu√©s de que Unity termine de cargar
         EditorApplication.delayCall += ShowWelcomeMessage;
     }
 
     static void ShowWelcomeMessage()
     {
-        // Solo mostrar una vez por sesiÛn
+        // Solo mostrar una vez por sesi√≥n
         if (SessionState.GetBool("ARToolsWelcomeShown", false))
             return;
 
         SessionState.SetBool("ARToolsWelcomeShown", true);
 
-        // Verificar si es la primera vez que se abre despuÈs de instalar las herramientas
+        // Verificar si es la primera vez que se abre despu√©s de instalar las herramientas
         bool isFirstTime = !EditorPrefs.GetBool("ARToolsInstalled", false);
 
         if (isFirstTime)
@@ -37,9 +37,9 @@ public class ARToolsWelcome
                 "???  AR TOOLS DISPONIBLES\n" +
                 "???????????????????????????????????????????????????\n" +
                 "Menu: AR Tools > ...\n" +
-                "  ï Image Tracking Validator\n" +
-                "  ï Generar Marcador de Prueba\n" +
-                "  ï Ver GuÌa de Im·genes\n" +
+                "  ¬ï Image Tracking Validator\n" +
+                "  ¬ï Generar Marcador de Prueba\n" +
+                "  ¬ï Ver Gu√≠a de Im√°genes\n" +
                 "???????????????????????????????????????????????????"
             );
         }
@@ -55,94 +55,94 @@ public class ARToolsWelcome
             "?                                                               ?\n" +
             "?????????????????????????????????????????????????????????????????\n" +
             "\n" +
-            "?? INSTALACI”N COMPLETA:\n" +
+            "?? INSTALACI√ìN COMPLETA:\n" +
             "\n" +
-            "  ? ImageTrackingValidator.cs       - ValidaciÛn manual\n" +
-            "  ? ARImageBuildValidator.cs         - ValidaciÛn autom·tica\n" +
+            "  ? ImageTrackingValidator.cs       - Validaci√≥n manual\n" +
+            "  ? ARImageBuildValidator.cs         - Validaci√≥n autom√°tica\n" +
             "  ? ARMarkerGenerator.cs              - Generador de marcadores\n" +
             "  ? ARToolsMenu.cs                    - Menu de herramientas\n" +
             "\n" +
-            "?? DOCUMENTACI”N:\n" +
+            "?? DOCUMENTACI√ìN:\n" +
             "\n" +
             "  ? README_SOLUCION.md                - Resumen ejecutivo\n" +
-            "  ? SOLUCION_ERROR_KEYPOINTS.md       - GuÌa detallada\n" +
-            "  ? GUIA_IMAGENES_AR.md               - GuÌa visual\n" +
-            "  ? INSTALACION_COMPLETA.md           - Õndice completo\n" +
+            "  ? SOLUCION_ERROR_KEYPOINTS.md       - Gu√≠a detallada\n" +
+            "  ? GUIA_IMAGENES_AR.md               - Gu√≠a visual\n" +
+            "  ? INSTALACION_COMPLETA.md           - √çndice completo\n" +
             "\n" +
             "???????????????????????????????????????????????????????????????\n" +
             "\n" +
             "??  ERROR DETECTADO:\n" +
             "    'Failed to get enough keypoints from target image'\n" +
             "\n" +
-            "?? SOLUCI”N R¡PIDA (3 pasos):\n" +
+            "?? SOLUCI√ìN R√ÅPIDA (3 pasos):\n" +
             "\n" +
             "    1. Menu ? AR Tools ? Generar Marcador de Prueba\n" +
-            "       ï Nombre: 'biblioteca'\n" +
-            "       ï Click: 'Generar Marcador'\n" +
+            "       ¬ï Nombre: 'biblioteca'\n" +
+            "       ¬ï Click: 'Generar Marcador'\n" +
             "\n" +
             "    2. Menu ? AR Tools ? Generar Marcador de Prueba\n" +
-            "       ï Nombre: 'cafeteria'\n" +
-            "       ï Click: 'Generar Marcador'\n" +
+            "       ¬ï Nombre: 'cafeteria'\n" +
+            "       ¬ï Click: 'Generar Marcador'\n" +
             "\n" +
             "    3. Reemplaza en ReferenceImageLibrary\n" +
-            "       ï Elimina: biblioteca.png y cafeteria.png antiguas\n" +
-            "       ï Agrega: Las nuevas desde Generated/\n" +
-            "       ï Configura: TamaÒo fÌsico 0.2 x 0.2 metros\n" +
+            "       ¬ï Elimina: biblioteca.png y cafeteria.png antiguas\n" +
+            "       ¬ï Agrega: Las nuevas desde Generated/\n" +
+            "       ¬ï Configura: Tama√±o f√≠sico 0.2 x 0.2 metros\n" +
             "\n" +
             "???????????????????????????????????????????????????????????????\n" +
             "\n" +
-            "?? ACCESO R¡PIDO:\n" +
+            "?? ACCESO R√ÅPIDO:\n" +
             "\n" +
             "    Menu: AR Tools ? ...\n" +
-            "    ?? ?? Ver Resumen de SoluciÛn\n" +
-            "    ?? ?? Ver GuÌa de Im·genes\n" +
-            "    ?? ?? Ver SoluciÛn Detallada\n" +
+            "    ?? ?? Ver Resumen de Soluci√≥n\n" +
+            "    ?? ?? Ver Gu√≠a de Im√°genes\n" +
+            "    ?? ?? Ver Soluci√≥n Detallada\n" +
             "    ?? ??????????????????????\n" +
             "    ?? Image Tracking Validator\n" +
             "    ?? Generar Marcador de Prueba ?\n" +
-            "    ?? Validar Im·genes AR Ahora\n" +
-            "    ?? Ayuda R·pida\n" +
+            "    ?? Validar Im√°genes AR Ahora\n" +
+            "    ?? Ayuda R√°pida\n" +
             "\n" +
             "???????????????????????????????????????????????????????????????\n" +
             "\n" +
-            "???  PROTECCI”N AUTOM¡TICA:\n" +
+            "???  PROTECCI√ìN AUTOM√ÅTICA:\n" +
             "\n" +
-            "    ? Antes de cada Build Android, el sistema validar·\n" +
-            "      autom·ticamente tus im·genes de referencia\n" +
-            "    ? Si detecta problemas crÌticos, te avisar·\n" +
-            "    ? Podr·s cancelar el build y arreglar primero\n" +
+            "    ? Antes de cada Build Android, el sistema validar√°\n" +
+            "      autom√°ticamente tus im√°genes de referencia\n" +
+            "    ? Si detecta problemas cr√≠ticos, te avisar√°\n" +
+            "    ? Podr√°s cancelar el build y arreglar primero\n" +
             "\n" +
             "???????????????????????????????????????????????????????????????\n" +
             "\n" +
-            "?? GARANTÕA:\n" +
+            "?? GARANT√çA:\n" +
             "\n" +
-            "    Los marcadores generados con la herramienta est·n\n" +
+            "    Los marcadores generados con la herramienta est√°n\n" +
             "    GARANTIZADOS para funcionar correctamente en ARCore.\n" +
             "\n" +
             "???????????????????????????????????????????????????????????????\n" +
             "\n" +
-            "?? M¡S INFORMACI”N:\n" +
+            "?? M√ÅS INFORMACI√ìN:\n" +
             "\n" +
-            "    Lee: Assets/INSTALACION_COMPLETA.md\n" +
-            "    O: Menu ? AR Tools ? Ver Resumen de SoluciÛn\n" +
+            "    Lee: Assets/docs/INSTALACION_COMPLETA.md\n" +
+            "    O: Menu ? AR Tools ? Ver Resumen de Soluci√≥n\n" +
             "\n" +
             "???????????????????????????????????????????????????????????????\n" +
             "\n" +
-            "?? °Listo para usar! Tu prÛximo build FUNCIONAR¡.\n" +
+            "?? ¬°Listo para usar! Tu pr√≥ximo build FUNCIONAR√Å.\n" +
             "\n\n"
         );
 
-        // Mostrar di·logo tambiÈn
+        // Mostrar di√°logo tambi√©n
         bool openDocs = EditorUtility.DisplayDialog(
             "?? Herramientas AR Instaladas",
             "Se han instalado herramientas para solucionar el error:\n" +
             "'Failed to get enough keypoints'\n\n" +
-            "SOLUCI”N R¡PIDA:\n" +
+            "SOLUCI√ìN R√ÅPIDA:\n" +
             "1. Menu ? AR Tools ? Generar Marcador de Prueba\n" +
             "2. Crea marcadores para 'biblioteca' y 'cafeteria'\n" +
-            "3. Reempl·zalos en ReferenceImageLibrary\n\n" +
-            "øQuieres abrir la documentaciÛn completa?",
-            "SÌ, abrir documentaciÛn",
+            "3. Reempl√°zalos en ReferenceImageLibrary\n\n" +
+            "¬øQuieres abrir la documentaci√≥n completa?",
+            "S√≠, abrir documentaci√≥n",
             "Ahora no"
         );
 

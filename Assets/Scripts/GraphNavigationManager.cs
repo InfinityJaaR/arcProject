@@ -129,7 +129,7 @@ public class GraphNavigationManager : MonoBehaviour
         if (graphNodes.Count == 0 || graphEdges.Count == 0)
         {
             Debug.LogError("[GraphNavigationManager] ? Grafo vacío - verifica Firestore");
-            Debug.LogError("[GraphNavigationManager] ?? Instrucciones: Assets/INSTRUCCIONES_FIRESTORE_GRAFO.md");
+            Debug.LogError("[GraphNavigationManager] ?? Instrucciones: Assets/docs/INSTRUCCIONES_FIRESTORE_GRAFO.md");
             yield break;
         }
         
@@ -619,6 +619,12 @@ public class GraphNavigationManager : MonoBehaviour
     /// </summary>
     private GraphNode FindNodeByBuildingData(BuildingData buildingData)
     {
+        if (buildingData == null) return null;
+
+        if (!string.IsNullOrEmpty(buildingData.documentId) &&
+            graphNodes.TryGetValue(buildingData.documentId, out var byId))
+            return byId;
+
         foreach (var node in graphNodes.Values)
         {
             if (node.buildingData != null &&

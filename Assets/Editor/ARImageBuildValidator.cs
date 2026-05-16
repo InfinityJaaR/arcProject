@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
-/// Previene builds con im·genes que probablemente fallar·n en ARCore
-/// Se ejecuta autom·ticamente antes de cada build
+/// Previene builds con im√°genes que probablemente fallar√°n en ARCore
+/// Se ejecuta autom√°ticamente antes de cada build
 /// ?? TEMPORALMENTE DESHABILITADO - Solo muestra warnings
 /// </summary>
 public class ARImageBuildValidator : UnityEditor.Build.IPreprocessBuildWithReport
@@ -19,8 +19,8 @@ public class ARImageBuildValidator : UnityEditor.Build.IPreprocessBuildWithRepor
         if (report.summary.platform != UnityEditor.BuildTarget.Android)
             return;
 
-        Debug.LogWarning("[ARImageValidator] ?? VALIDACI”N EN MODO PERMISIVO");
-        Debug.LogWarning("[ARImageValidator] El build continuar· incluso si hay im·genes problem·ticas");
+        Debug.LogWarning("[ARImageValidator] ?? VALIDACI√ìN EN MODO PERMISIVO");
+        Debug.LogWarning("[ARImageValidator] El build continuar√° incluso si hay im√°genes problem√°ticas");
         
         // Buscar todas las Reference Image Libraries en el proyecto
         string[] guids = AssetDatabase.FindAssets("t:XRReferenceImageLibrary");
@@ -41,7 +41,7 @@ public class ARImageBuildValidator : UnityEditor.Build.IPreprocessBuildWithRepor
             if (library == null)
                 continue;
 
-            Debug.Log($"[ARImageValidator] ?? Analizando: {library.name} ({library.count} im·genes)");
+            Debug.Log($"[ARImageValidator] ?? Analizando: {library.name} ({library.count} im√°genes)");
 
             for (int i = 0; i < library.count; i++)
             {
@@ -53,13 +53,13 @@ public class ARImageBuildValidator : UnityEditor.Build.IPreprocessBuildWithRepor
         // Solo mostrar advertencias, no bloquear el build
         if (warnings.Count > 0)
         {
-            string warningMsg = "?? ADVERTENCIAS en im·genes AR:\n" + string.Join("\n", warnings);
+            string warningMsg = "?? ADVERTENCIAS en im√°genes AR:\n" + string.Join("\n", warnings);
             Debug.LogWarning(warningMsg);
             Debug.LogWarning("[ARImageValidator] Si el build falla en ARCore, usa: AR Tools > Generar Marcador de Prueba");
         }
         else
         {
-            Debug.Log("[ARImageValidator] ? Todas las im·genes AR pasaron la validaciÛn b·sica");
+            Debug.Log("[ARImageValidator] ? Todas las im√°genes AR pasaron la validaci√≥n b√°sica");
         }
     }
 
@@ -71,39 +71,39 @@ public class ARImageBuildValidator : UnityEditor.Build.IPreprocessBuildWithRepor
         // Sin textura
         if (texture == null)
         {
-            warnings.Add($"ï '{name}': NO tiene textura asignada - El build FALLAR¡");
+            warnings.Add($"¬ï '{name}': NO tiene textura asignada - El build FALLAR√Å");
             return;
         }
 
-        // ResoluciÛn muy baja
+        // Resoluci√≥n muy baja
         if (texture.width < 300 || texture.height < 300)
         {
-            warnings.Add($"ï '{name}': ResoluciÛn baja ({texture.width}x{texture.height}px)");
+            warnings.Add($"¬ï '{name}': Resoluci√≥n baja ({texture.width}x{texture.height}px)");
         }
 
-        // TamaÒo fÌsico no especificado
+        // Tama√±o f√≠sico no especificado
         if (!refImage.specifySize || refImage.size.x <= 0 || refImage.size.y <= 0)
         {
-            warnings.Add($"ï '{name}': TamaÒo fÌsico no especificado");
+            warnings.Add($"¬ï '{name}': Tama√±o f√≠sico no especificado");
         }
     }
 }
 
 /// <summary>
-/// Menu personalizado para validar im·genes manualmente
+/// Menu personalizado para validar im√°genes manualmente
 /// </summary>
 public class ARImageMenu
 {
-    [MenuItem("AR Tools/Validar Im·genes AR Ahora")]
+    [MenuItem("AR Tools/Validar Im√°genes AR Ahora")]
     public static void ValidateNow()
     {
-        Debug.Log("========== VALIDACI”N MANUAL DE IM¡GENES AR ==========");
+        Debug.Log("========== VALIDACI√ìN MANUAL DE IM√ÅGENES AR ==========");
         
         string[] guids = AssetDatabase.FindAssets("t:XRReferenceImageLibrary");
         
         if (guids.Length == 0)
         {
-            EditorUtility.DisplayDialog("Sin librerÌas", "No se encontraron Reference Image Libraries", "OK");
+            EditorUtility.DisplayDialog("Sin librer√≠as", "No se encontraron Reference Image Libraries", "OK");
             return;
         }
 
@@ -117,13 +117,13 @@ public class ARImageMenu
         }
 
         Debug.Log("? Seleccionada la Reference Image Library en el Inspector");
-        Debug.Log("Revisa la consola para m·s detalles");
+        Debug.Log("Revisa la consola para m√°s detalles");
     }
 
-    [MenuItem("AR Tools/Abrir DocumentaciÛn de SoluciÛn")]
+    [MenuItem("AR Tools/Abrir Documentaci√≥n de Soluci√≥n")]
     public static void OpenDocumentation()
     {
-        string path = "Assets/SOLUCION_ERROR_KEYPOINTS.md";
+        string path = "Assets/docs/SOLUCION_ERROR_KEYPOINTS.md";
         if (System.IO.File.Exists(path))
         {
             UnityEditorInternal.InternalEditorUtility.OpenFileAtLineExternal(path, 1);
@@ -131,13 +131,13 @@ public class ARImageMenu
         else
         {
             EditorUtility.DisplayDialog(
-                "DocumentaciÛn", 
-                "El error 'Failed to get enough keypoints' ocurre cuando las im·genes son muy simples.\n\n" +
+                "Documentaci√≥n", 
+                "El error 'Failed to get enough keypoints' ocurre cuando las im√°genes son muy simples.\n\n" +
                 "Soluciones:\n" +
-                "1. Aumenta el contraste de las im·genes\n" +
-                "2. AÒade detalles distintivos (texto, bordes)\n" +
-                "3. Evita colores sÛlidos\n" +
-                "4. Usa im·genes con esquinas y texturas",
+                "1. Aumenta el contraste de las im√°genes\n" +
+                "2. A√±ade detalles distintivos (texto, bordes)\n" +
+                "3. Evita colores s√≥lidos\n" +
+                "4. Usa im√°genes con esquinas y texturas",
                 "Entendido"
             );
         }
